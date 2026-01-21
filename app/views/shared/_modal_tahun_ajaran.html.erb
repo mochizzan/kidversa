@@ -1,0 +1,57 @@
+<div class="modal fade" id="modalTahunAjaran" tabindex="-1" aria-labelledby="modalTahunAjaranLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="modalTahunAjaranLabel">Pengaturan Tahun Ajaran</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body">
+        
+        <div class="mb-4 bg-light p-3 rounded-3">
+          <label class="form-label fw-bold small text-uppercase text-muted">Tambah Periode Baru</label>
+          <%= form_with url: tambah_tahun_ajaran_path, method: :post, class: "d-flex gap-2" do |f| %>
+            <%= f.text_field :nama_tahun_ajaran, class: "form-control", placeholder: "Cth: 2025/2026 Genap", required: true %>
+            <%= f.submit "Tambah", class: "btn btn-primary" %>
+          <% end %>
+        </div>
+
+        <div>
+          <label class="form-label fw-bold small text-uppercase text-muted mb-3">Daftar Tahun Ajaran</label>
+          <div class="list-group list-group-flush border rounded-3 overflow-hidden">
+            
+            <% if @semua_tahun_ajaran.present? %>
+              <% @semua_tahun_ajaran.each do |ta| %>
+                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                  <div>
+                    <span class="fw-bold <%= ta.is_active == 1 ? 'text-primary' : 'text-dark' %>">
+                      <%= ta.nama %>
+                    </span>
+                    <% if ta.is_active == 1 %>
+                      <span class="badge bg-primary ms-2">Aktif</span>
+                    <% end %>
+                  </div>
+
+                  <% unless ta.is_active == 1 %>
+                    <%= form_with url: ganti_tahun_ajaran_aktif_path, method: :post do |f| %>
+                      <%= f.hidden_field :tahun_ajaran_id, value: ta.id %>
+                      <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                        Aktifkan
+                      </button>
+                    <% end %>
+                  <% else %>
+                     <button class="btn btn-sm btn-light text-muted rounded-pill px-3" disabled>Terpilih</button>
+                  <% end %>
+                </div>
+              <% end %>
+            <% else %>
+              <div class="p-3 text-center text-muted">Belum ada data tahun ajaran.</div>
+            <% end %>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

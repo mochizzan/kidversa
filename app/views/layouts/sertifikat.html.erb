@@ -1,0 +1,192 @@
+<div class="page-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333;">
+  <div class="header" style="margin-bottom: 40px;">
+      <table width="100%" style="border-bottom: 4px solid #2c3e50; padding-bottom: 20px;">
+        <tr>
+          <td width="15%" align="left" valign="top">
+            <%= wicked_pdf_image_tag("profile.png", size: "80x80", objectfit: "cover", borderradius: "12px") %>
+          </td>
+          <td width="70%" align="center" valign="middle">
+            <h1 style="margin: 0; font-size: 26px; text-transform: uppercase; color: #2c3e50; letter-spacing: 1px;">Laporan Perkembangan Anak</h1>
+            <p style="margin: 8px 0 0; font-size: 16px; font-weight: 500; color: #555;">
+              TAHUN AJARAN <%= @tahun_ajaran.nama rescue "-" %>
+            </p>
+          </td>
+          <td width="15%"></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="biodata-section" style="margin-bottom: 40px;">
+      <table width="100%">
+        <tr>
+          <td width="75%" valign="top">
+            
+            <div style="margin-bottom: 20px;">
+              <div style="background: #ecf0f1; padding: 8px 15px; border-left: 5px solid #2c3e50; margin-bottom: 10px;">
+                <strong style="color: #2c3e50; font-size: 14px; text-transform: uppercase;">A. Data Anak</strong>
+              </div>
+              <table width="100%" cellpadding="5" style="font-size: 13px;">
+                <tr>
+                  <td width="160" style="color: #7f8c8d;">Nama Lengkap</td>
+                  <td width="10">:</td>
+                  <td style="font-size: 14px;"><strong><%= @studentName %></strong></td>
+                </tr>
+                <tr>
+                  <td style="color: #7f8c8d;">NISN</td>
+                  <td>:</td>
+                  <td><%= @nisn %></td>
+                </tr>
+                <tr>
+                  <td style="color: #7f8c8d;">Tanggal Lahir</td>
+                  <td>:</td>
+                  <td><%= @tanggal_lahir %></td>
+                </tr>
+                <tr>
+                  <td style="color: #7f8c8d;">Kelompok Usia</td>
+                  <td>:</td>
+                  <td><%= @kelompok_usia %> (<%= @usia %> Tahun)</td>
+                </tr>
+                <tr>
+                  <td style="color: #7f8c8d;">Alamat</td>
+                  <td>:</td>
+                  <td><%= @alamat %></td>
+                </tr>
+              </table>
+            </div>
+
+            <div>
+              <div style="background: #ecf0f1; padding: 8px 15px; border-left: 5px solid #2c3e50; margin-bottom: 10px;">
+                <strong style="color: #2c3e50; font-size: 14px; text-transform: uppercase;">B. Data Orang Tua / Wali</strong>
+              </div>
+              <table width="100%" cellpadding="5" style="font-size: 13px;">
+                <tr>
+                  <td width="160" style="color: #7f8c8d;">Nama Ayah</td>
+                  <td width="10">:</td>
+                  <td><%= @nama_ayah %></td>
+                </tr>
+                <tr>
+                  <td style="color: #7f8c8d;">Pekerjaan Ayah</td>
+                  <td>:</td>
+                  <td><%= @pekerjaan_ayah %></td>
+                </tr>
+                <tr>
+                  <td style="color: #7f8c8d;">Nama Ibu</td>
+                  <td>:</td>
+                  <td><%= @nama_ibu %></td>
+                </tr>
+                <tr>
+                  <td style="color: #7f8c8d;">Pekerjaan Ibu</td>
+                  <td>:</td>
+                  <td><%= @pekerjaan_ibu %></td>
+                </tr>
+              </table>
+            </div>
+
+          </td>
+
+          <td width="25%" valign="top" align="right">
+            <div style="padding: 10px; background: #fff; border: 1px solid #ddd; box-shadow: 3px 3px 10px rgba(0,0,0,0.05); display: inline-block;">
+              <% if @profile_path.present? %>
+                <%= wicked_pdf_image_tag(@profile_path, size: "120x150", objectfit: "cover", display:"block") %>
+              <% else %>
+                <div style="width: 120px; height: 160px; background: #f8f9fa; color: #bdc3c7; display: flex; align-items: center; justify-content: center; font-size: 11px;">
+                  FOTO 3x4
+                </div>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="assessment-section" style="margin-bottom: 30px;">
+       <div style="background: #ecf0f1; padding: 8px 15px; border-left: 5px solid #2c3e50; margin-bottom: 15px;">
+          <strong style="color: #2c3e50; font-size: 14px; text-transform: uppercase;">C. Capaian Perkembangan</strong>
+       </div>
+      
+      <table width="100%" cellspacing="0" cellpadding="10" style="font-size: 13px; border-collapse: collapse; width: 100%;">
+        <thead>
+          <tr style="background-color: #2c3e50; color: #ffffff;">
+            <th align="center" width="50" style="text-transform: uppercase; font-size: 11px; letter-spacing: 1px; border-top-left-radius: 6px;">No</th>
+            <th align="left" style="text-transform: uppercase; font-size: 11px; letter-spacing: 1px;">Indikator Capaian Pembelajaran</th>
+            <th align="center" width="140" style="text-transform: uppercase; font-size: 11px; letter-spacing: 1px; border-top-right-radius: 6px;">Capaian Assessment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @assessments.each_with_index do |assessment, index| %>
+            <% row_bg = index.even? ? '#ffffff' : '#f9f9f9' %>
+            
+            <tr style="background-color: <%= row_bg %>; border-bottom: 1px solid #eee;">
+              <td align="center" style="color: #7f8c8d;"><%= index + 1 %></td>
+              <td style="color: #2c3e50; font-weight: 500;">
+                <%= assessment.pertanyaan.nama_pertanyaan %>
+              </td>
+              <td align="center">
+                 <% 
+                    bg_color = case assessment.nilai
+                      when 'BB' then '#ffebee'
+                      when 'MB' then '#fff8e1'
+                      when 'BSH' then '#e8f5e9'
+                      when 'BSB' then '#e3f2fd'
+                      else '#f0f0f0'
+                    end
+                    
+                    text_color = case assessment.nilai
+                      when 'BB' then '#c62828'
+                      when 'MB' then '#f57f17'
+                      when 'BSH' then '#2e7d32'
+                      when 'BSB' then '#1565c0'
+                      else '#999'
+                    end
+                 %>
+                 <div style="background-color: <%= bg_color %>; color: <%= text_color %>; padding: 6px 0; border-radius: 20px; font-weight: bold; font-size: 11px; width: 100px; text-align: center;">
+                   <%= assessment.nilai %>
+                 </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      
+      <div style="margin-top: 10px; font-size: 10px; color: #95a5a6; text-align: right; font-style: italic;">
+        Keterangan: <strong>BB</strong> (Belum Berkembang), <strong>MB</strong> (Mulai Berkembang), <strong>BSH</strong> (Berkembang Sesuai Harapan), <strong>BSB</strong> (Berkembang Sangat Baik)
+      </div>
+    </div>
+
+    <div class="footer-section">
+      
+      <div style="background-color: #f8fcfd; border: 1px dashed #b2bec3; border-radius: 8px; padding: 20px; margin-bottom: 40px;">
+        <strong style="font-size: 12px; color: #2c3e50; display: block; margin-bottom: 8px; text-transform: uppercase;">Catatan Guru Pembimbing</strong>
+        <p style="margin: 0; font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #555; line-height: 1.5;">
+           "<%= @catatan.present? ? @catatan : "Ananda menunjukkan semangat belajar yang luar biasa. Teruslah bereksplorasi!" %>"
+        </p>
+      </div>
+
+      <table width="100%">
+        <tr>
+          <td align="center" width="30%" valign="top">
+            <p style="margin-bottom: 70px; font-size: 12px; color: #7f8c8d;">Orang Tua / Wali</p>
+            <strong style="border-bottom: 1px solid #333; padding-bottom: 4px; display: inline-block; min-width: 140px; color: #2c3e50;">
+              <%= @nama_ayah.present? ? @nama_ayah : "...................." %>
+            </strong>
+          </td>
+          
+          <td width="40%"></td>
+
+          <td align="center" width="30%" valign="top">
+            <p style="margin-bottom: 70px; font-size: 12px; color: #7f8c8d;">
+              Bandung, <%= Date.today.strftime("%d %B %Y") %><br>
+              Guru Pembimbing
+            </p>
+            <strong style="border-bottom: 1px solid #333; padding-bottom: 4px; display: inline-block; min-width: 140px; color: #2c3e50;">
+              <%= @guru_pembimbing %>
+            </strong>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="margin-top: 40px; text-align: center; font-size: 10px; color: #bdc3c7; border-top: 1px solid #f0f0f0; padding-top: 15px;">
+      &copy; 2026 Kidversa by CV EduMed
+    </div>
+</div>

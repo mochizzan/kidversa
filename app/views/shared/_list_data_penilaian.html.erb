@@ -1,0 +1,56 @@
+<tr>
+  <td class="ps-4 text-muted fw-medium"><%= i + 1 %></td>
+  
+  <td>
+    <div class="d-flex align-items-center">
+      <img src="<%= data.profile_path.present? ? data.profile_path : "https://ui-avatars.com/api/?name=#{data.nama}&background=random" %>" 
+           class="rounded-circle me-3 border" width="40" height="40" alt="Avatar">
+      <div>
+        <div class="fw-bold text-dark"><%= data.nama %></div>
+        <div class="small text-muted">NISN: <%= data.nisn %></div>
+      </div>
+    </div>
+  </td>
+  
+  <td class="text-center">
+    <% if complete %>
+      <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 border border-success border-opacity-10">
+        <i class="bi bi-check-circle-fill me-1"></i> Selesai
+      </span>
+    <% else %>
+      <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 border border-secondary border-opacity-10">
+        <i class="bi bi-hourglass-split me-1"></i> Belum
+      </span>
+    <% end %>
+  </td>
+  
+  <td class="pe-4 text-end">
+    <div class="d-flex justify-content-end align-items-center gap-2">
+    
+      <% if complete %>
+      <button type="button" 
+              class="btn btn-light text-secondary border btn-sm rounded-pill px-3 fw-bold transition-hover"
+              data-bs-toggle="modal" 
+              data-bs-target="#modalCatatan"
+              data-siswa-id="<%= data.siswa_id %>"
+              data-catatan="<%= data.catatan %>"
+              data-nama="<%= data.nama %>"
+              data-nisn="<%= data.nisn %>"
+              data-kelompok="<%= data.kelompok_usia %>">
+        <i class="bi bi-journal-plus me-1"></i> <span class="d-none d-md-inline">Catatan</span>
+      </button>
+      <% end %>
+
+      <% if complete %>
+        <a data-turbo-frame="_top" href="<%= penilaian_path(siswa_id: data.siswa_id) %>" class="btn btn-light text-warning border btn-sm rounded-pill px-4 fw-bold">
+          <i class="bi bi-pencil-fill me-2"></i>Ubah
+        </a>
+      <% else %>
+        <a data-turbo-frame="_top" href="<%= penilaian_path(siswa_id: data.siswa_id) %>" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm">
+          <i class="bi bi-pencil-square me-2"></i>Nilai
+        </a>
+      <% end %>
+
+    </div>
+  </td>
+</tr>

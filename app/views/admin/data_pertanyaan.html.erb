@@ -1,0 +1,78 @@
+<div class="container py-4">
+
+  <div class="mb-4">
+    <a href="<%= admin_path%>" class="btn btn-white bg-white border shadow-sm rounded-pill px-4 py-2 text-decoration-none text-secondary d-inline-flex align-items-center transition-hover">
+      <i class="bi bi-arrow-left me-2"></i> 
+      <span class="fw-bold small">Kembali ke Dashboard</span>
+    </a>
+  </div>
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+      <div class="d-flex align-items-center gap-3 mb-1">
+        <h2 class="fw-bold text-dark m-0">Assesment Guru untuk Anak</h2>
+        
+        <% if @tahun_ajaran_aktif %>
+          <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 fw-bold">
+            <i class="bi bi-calendar-check me-1"></i>
+            <%= @tahun_ajaran_aktif.nama %>
+          </span>
+        <% else %>
+           <span class="badge bg-danger rounded-pill">T.A Tidak Aktif</span>
+        <% end %>
+      </div>
+      <p class="text-muted small m-0">Daftar indikator assesment perkembangan anak tahun ini.</p>
+    </div>
+    
+    <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm hover-scale" data-bs-toggle="modal" data-bs-target="#modalTambahPertanyaan">
+      <i class="bi bi-plus-lg me-2"></i>Buat Indikator Baru
+    </button>
+  </div>
+
+  <div class="row g-3">
+    
+  <% bg = ["bg-success", "bg-warning", "bg-danger"] %>
+
+  <% if @data_pertanyaan.present? %>
+    
+    <% @data_pertanyaan.each_with_index do |data, i| %>
+      <%= render 'shared/list_data_pertanyaan', data: data, index: i, bg: bg[i % 3] %>
+    <% end %>
+
+  <% else %>
+
+    <div class="col-12">
+      <div class="card border-2 border-dashed border-secondary border-opacity-25 rounded-4 py-5 bg-light bg-opacity-50">
+        <div class="card-body text-center d-flex flex-column align-items-center justify-content-center">
+          
+          <div class="mb-3 text-secondary opacity-25">
+            <i class="bi bi-clipboard-data display-1"></i>
+          </div>
+          
+          <h5 class="fw-bold text-secondary mb-2">Belum ada indikator assesment</h5>
+          <p class="text-muted small mb-0" style="max-width: 400px;">
+            Data assesment untuk Tahun Ajaran <b><%= @tahun_ajaran_aktif&.nama %></b> masih kosong.<br> 
+            Silakan tambahkan indikator assesment baru melalui tombol di atas.
+          </p>
+
+        </div>
+      </div>
+    </div>
+
+  <% end %>
+
+  </div>
+</div>
+
+<%= render 'shared/modal_tambah_pertanyaan' %>
+<%= render 'shared/modal_edit_pertanyaan' %>
+
+<style>
+  .hover-border { transition: all 0.2s ease; border: 1px solid transparent; }
+  .hover-border:hover { border-color: var(--bs-primary); transform: translateY(-2px); }
+  
+  .hover-scale { transition: transform 0.2s; }
+  .hover-scale:hover { transform: scale(1.02); }
+
+  .transition-hover:hover { background-color: #f8f9fa !important; transform: translateX(-3px); }
+</style>

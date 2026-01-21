@@ -1,0 +1,61 @@
+<div class="modal fade" id="modalEditPertanyaan" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow rounded-4">
+      
+      <div class="modal-header bg-warning bg-opacity-10 border-bottom-0 py-3">
+        <div class="d-flex align-items-center">
+          <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+            <i class="bi bi-pencil-fill fs-5"></i>
+          </div>
+          <div>
+            <h5 class="modal-title fw-bold text-dark">Edit Indikator</h5>
+            <p class="mb-0 text-muted small">Perbarui data pertanyaan.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form id="formEditPertanyaan" action="<%= edit_data_pertanyaan_path %>" method="post">
+        <input id="pertanyaan-id" type="hidden" name="pertanyaan_id">
+        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+
+        <div class="modal-body p-4">
+          <div class="row g-3">
+
+            <div class="col-12">
+              <label for="editIsi" class="form-label fw-bold text-secondary small text-uppercase">Isi Pertanyaan</label>
+              <textarea id="isi-pertanyaan" name="isi" class="form-control bg-light" name="isi" id="editIsi" rows="4" required style="resize: none;"></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer border-top-0 px-4 pb-4">
+          <button type="button" class="btn btn-light rounded-pill px-4 fw-bold text-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-warning rounded-pill px-5 fw-bold shadow-sm">Simpan Perubahan</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('turbo:load', function () {
+    const modal = document.getElementById('modalEditPertanyaan');
+    if (modal) {
+      modal.addEventListener('show.bs.modal', function (e) {
+        const button = e.relatedTarget;
+        const isi = button.getAttribute('data-isi');
+        const pertanyaanId = button.getAttribute('data-id');
+
+        console.log(isi);
+        console.log(pertanyaanId);
+
+        document.getElementById('pertanyaan-id').value = pertanyaanId;
+        document.getElementById('isi-pertanyaan').value = isi;
+      })
+    }
+  })
+</script>

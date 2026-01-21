@@ -1,0 +1,81 @@
+<div class="container py-5">
+  
+  <div class="mb-4">
+    <a href="<%= admin_path %>" class="btn btn-light bg-white border shadow-sm rounded-pill px-4 py-2 text-decoration-none text-secondary d-inline-flex align-items-center">
+      <i class="bi bi-arrow-left me-2"></i> 
+      <span class="fw-bold small text-uppercase">Kembali ke Dashboard</span>
+    </a>
+  </div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Data Siswa</h3>
+      <p class="text-muted small mb-0">Tahun Ajaran: <span class="badge bg-primary bg-opacity-10 text-primary"><%= @tahun_ajaran_aktif %></span></p>
+    </div>
+    
+    <div class="d-flex gap-2">
+      <button class="btn btn-success rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalMigrasiSiswa">
+        <i class="bi bi-arrow-repeat me-2"></i> Migrasi Siswa Lama
+      </button>
+      
+      <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalTambahSiswa">
+        <i class="bi bi-plus-lg me-2"></i> Siswa Baru
+      </button>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <% if @siswas.present? %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th class="py-3 ps-4 text-secondary text-uppercase x-small fw-bold" style="width: 35%;">Nama Siswa</th>
+              <th class="py-3 text-secondary text-uppercase x-small fw-bold">Usia</th>
+              <th class="py-3 text-secondary text-uppercase x-small fw-bold">Kelompok</th>
+              <th class="py-3 text-secondary text-uppercase x-small fw-bold">Wali Kelas</th>
+              <th class="py-3 pe-4 text-end text-secondary text-uppercase x-small fw-bold">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @siswas.each do |data| %>
+              <%= render partial: 'shared/list_data_siswa', locals: { data: data } %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="card-footer bg-white border-top-0 py-4 d-flex justify-content-between align-items-center">
+        <div class="small text-muted">
+          Menampilkan <b><%= @siswas.count %></b> dari total <b><%= @siswas.total_count %></b> siswa
+        </div>
+        <%= paginate @siswas, pagination_class: "pagination-sm mb-0" %>
+      </div>
+
+    <% else %>
+      <div class="text-center py-5">
+        <div class="mb-3">
+          <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+            <i class="bi bi-people text-secondary opacity-25" style="font-size: 3rem;"></i>
+          </div>
+        </div>
+        <h5 class="fw-bold text-dark">Belum Ada Data Siswa</h5>
+        <p class="text-muted small mb-4">
+          Data siswa untuk tahun ajaran <b><%= @tahun_ajaran_aktif %></b> belum tersedia.<br>
+          Silakan tambah siswa baru atau migrasikan siswa dari tahun lalu.
+        </p>
+        <div class="d-flex justify-content-center gap-2">
+          <button class="btn btn-outline-success rounded-pill px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#modalMigrasiSiswa">
+            Ambil Data Lama
+          </button>
+           <button class="btn btn-primary rounded-pill px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#modalTambahSiswa">
+            Input Siswa Baru
+          </button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%= render 'shared/modal_tambah_data_siswa' %>
+<%= render 'shared/modal_edit_data_siswa' %>
+<%= render 'shared/modal_migrasi_siswa' %>

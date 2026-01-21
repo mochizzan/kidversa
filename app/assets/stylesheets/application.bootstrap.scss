@@ -1,0 +1,10 @@
+$font-family-sans-serif: "Outfit", sans-serif;
+$font-family-base: "Outfit", sans-serif;
+
+@import 'bootstrap/scss/bootstrap';
+@import 'bootstrap-icons/font/bootstrap-icons';
+
+body {
+    font-family: "Outfit", sans-serif !important;
+    font-optical-sizing: auto;
+}

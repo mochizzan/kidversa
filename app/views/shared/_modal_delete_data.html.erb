@@ -1,0 +1,61 @@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered px-3"> <div class="modal-content border-0 shadow-lg rounded-4 text-center overflow-hidden">
+      
+      <div class="modal-body p-4 p-md-5">
+        
+        <div class="mb-4 d-inline-block position-relative">
+          <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+            <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+          </div>
+        </div>
+
+        <h4 class="fw-bold text-dark mb-2">Hapus Data Ini?</h4>
+        <p class="text-muted mb-0" id="deleteMessage">
+          Tindakan ini tidak dapat dibatalkan. Data akan hilang selamanya dari database.
+        </p>
+      </div>
+
+      <div class="modal-footer border-top-0 justify-content-center pb-4 px-4 gap-2 bg-light">
+        
+        <button type="button" class="btn btn-white bg-white border shadow-sm rounded-pill px-4 fw-bold text-secondary" data-bs-dismiss="modal">
+          Batal
+        </button>
+
+        <form id="deleteForm" action="" method="post" class="d-inline" data-turbo="false">
+          <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+          
+          <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
+            Ya, Hapus
+          </button>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener("turbo:load", function () {
+        const deleteModal = document.getElementById("deleteModal");
+       if (deleteModal) {
+        deleteModal.addEventListener("show.bs.modal", function (event) {
+            const button = event.relatedTarget;
+
+            const deleteForm = document.getElementById("deleteForm");
+            const deleteMessage = document.getElementById('deleteMessage');
+
+            const deleteUrl = button.getAttribute("data-delete-url");
+            const customMessage = button.getAttribute("data-delete-message");
+
+            deleteForm.action = deleteUrl;
+            
+            if (customMessage) {
+                deleteMessage.textContent = customMessage;
+            } else {
+                deleteMessage.textContent = "Tindakan ini tidak dapat dibatalkan. Data akan hilang selamanya dari database.";
+            }
+        })
+       }
+    })
+</script>

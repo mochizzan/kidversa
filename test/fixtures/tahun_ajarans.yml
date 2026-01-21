@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  riwayat: MyString
+  status_penilaian: MyString
+
+two:
+  riwayat: MyString
+  status_penilaian: MyString

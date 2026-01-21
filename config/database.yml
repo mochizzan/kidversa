@@ -1,0 +1,24 @@
+# config/database.yml
+
+default: &default
+  adapter: mysql2
+  encoding: utf8mb4
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  username: root        # User default XAMPP/Laragon
+  password:             # Password default biasanya kosong
+  host: 127.0.0.1       # Kita pakai IP agar lebih stabil di Windows
+
+development:
+  <<: *default
+  database: kidversa
+
+test:
+  <<: *default
+  database: kidversa
+
+# Konfigurasi Production (Nanti diatur saat deploy)
+production:
+  <<: *default
+  database: kidversa
+  username: kidversa
+  password: <%= ENV["EDUSPARK_DATABASE_PASSWORD"] %>

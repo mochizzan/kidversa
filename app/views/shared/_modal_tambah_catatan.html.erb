@@ -1,0 +1,86 @@
+<div class="modal fade" id="modalCatatan" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow rounded-4">
+      
+      <div class="modal-header bg-light border-bottom-0 pb-0 pt-4 px-4">
+        <div class="d-flex align-items-start w-100">
+          
+          <div class="bg-white border rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm flex-shrink-0" style="width: 50px; height: 50px;">
+            <i class="bi bi-journal-text text-primary fs-4"></i>
+          </div>
+
+          <div class="flex-grow-1">
+            <h5 class="fw-bold text-dark mb-1" id="modalCatatanNama">Nama Siswa</h5>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10 rounded-pill" id="modalCatatanKelompok">
+                Kelompok -
+              </span>
+              <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 rounded-pill" id="modalCatatanNISN">
+                NISN: -
+              </span>
+            </div>
+          </div>
+
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+      </div>
+
+      <%= form_with url: simpan_catatan_path, method: :post, local: true do |f| %>
+        
+        <%= f.hidden_field :siswa_id, id: "modalCatatanSiswaId" %>
+
+        <div class="modal-body p-4">
+          <label for="inputCatatan" class="form-label fw-bold text-secondary small text-uppercase">Isi Catatan Perkembangan</label>
+          
+          <div class="bg-light p-2 rounded-3 border">
+             <%= f.text_area :isi_catatan, 
+                 class: "form-control border-0 bg-transparent shadow-none", 
+                 id: "inputCatatan", 
+                 rows: "5", 
+                 placeholder: "Tuliskan catatan khusus mengenai perkembangan perilaku atau akademik siswa ini...",
+                 required: true,
+                 style: "resize: none;" %>
+          </div>
+          <div class="form-text text-muted small mt-2">
+            <i class="bi bi-info-circle me-1"></i> Catatan ini akan terlihat oleh orang tua siswa.
+          </div>
+        </div>
+
+        <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
+          <button type="button" class="btn btn-light rounded-pill px-4 fw-bold text-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+            <i class="bi bi-save me-2"></i>Simpan Catatan
+          </button>
+        </div>
+
+      <% end %>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('turbo:load', function () {
+    const modalCatatan = document.getElementById('modalCatatan');
+    
+    if (modalCatatan) {
+      modalCatatan.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+
+        const id = button.getAttribute('data-siswa-id');
+        const nama = button.getAttribute('data-nama');
+        const nisn = button.getAttribute('data-nisn');
+        const kelompok = button.getAttribute('data-kelompok');
+        const catatan = button.getAttribute('data-catatan');
+
+
+        document.getElementById('modalCatatanSiswaId').value = id;
+        document.getElementById('modalCatatanNama').textContent = nama;
+        document.getElementById('modalCatatanNISN').textContent = 'NISN: ' + (nisn || '-');
+        document.getElementById('modalCatatanKelompok').textContent = 'Kelompok ' + (kelompok || '-');
+        
+        document.getElementById('inputCatatan').value = catatan;
+      });
+    }
+  });
+</script>

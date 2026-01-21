@@ -1,0 +1,208 @@
+<div class="sticky-top w-100" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 1040;">
+  
+  <div class="container py-3">
+    <div class="d-flex align-items-center justify-content-between gap-4">
+      
+      <a href="<%= data_nilai_path %>" class="btn btn-light bg-white border shadow-sm rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-secondary" style="width: 45px; height: 45px; transition: transform 0.2s;">
+        <i class="bi bi-arrow-left fs-5"></i>
+      </a>
+
+      <div class="flex-grow-1 d-flex align-items-center bg-white border rounded-pill pe-4 position-relative overflow-hidden shadow-sm" style="max-width: 450px; padding: 6px;">
+        
+        <div class="flex-shrink-0 me-3">
+            <img src="<%= @data_siswa.profile_path.present? ? @data_siswa.profile_path : "https://ui-avatars.com/api/?name=#{@data_siswa.nama}&background=random&size=128" %>" 
+                 class="d-block rounded-circle object-fit-cover shadow-sm" 
+                 style="width: 45px; height: 45px;" 
+                 alt="Foto">
+        </div>
+
+        <div class="d-flex flex-column justify-content-center lh-1">
+          <h6 class="fw-bold text-dark m-0 text-truncate mb-1">
+            <%= @data_siswa.nama || "Siswa" %>
+          </h6>
+          <div class="d-flex align-items-center gap-2 text-muted small">
+             <span>Kelompok <%= @data_siswa.kelompok_usia || "-" %></span>
+             <span class="opacity-25">|</span>
+             <span>NIS: <%= @data_siswa.nisn || "-" %></span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="flex-shrink-0 text-end d-none d-sm-block ms-auto">
+        <div class="d-flex align-items-center gap-2">
+            <div class="d-flex flex-column text-end">
+                <span class="fw-bolder text-dark h4 m-0" id="progressTextLarge">0%</span>
+                <span class="text-muted text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 1px;">Selesai</span>
+            </div>
+            </div>
+      </div>
+      
+      <div class="flex-shrink-0 d-block d-sm-none fw-bold text-primary fs-5">
+          <span id="progressTextMobile">0%</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="progress rounded-0" style="height: 4px; background-color: #f1f5f9;">
+    <div class="progress-bar bg-primary transition-width" role="progressbar" style="width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);" id="progressBar"></div>
+  </div>
+
+</div>
+
+<div class="container py-5 bg-light-subtle" style="min-height: 100vh;">
+
+  <div class="row justify-content-center mb-5">
+    <div class="col-12 col-md-10">
+      <div class="d-flex flex-wrap gap-2 justify-content-center text-center">
+        <span class="badge rounded-pill text-bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 px-3 py-2 fw-medium">
+            <i class="bi bi-circle-fill me-1 small"></i> BB: Belum Berkembang
+        </span>
+        <span class="badge rounded-pill text-bg-warning bg-opacity-10 text-dark border border-warning border-opacity-10 px-3 py-2 fw-medium">
+            <i class="bi bi-circle-fill me-1 small"></i> MB: Mulai Berkembang
+        </span>
+        <span class="badge rounded-pill text-bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10 px-3 py-2 fw-medium">
+            <i class="bi bi-circle-fill me-1 small"></i> BSH: Berkembang Sesuai Harapan
+        </span>
+        <span class="badge rounded-pill text-bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-3 py-2 fw-medium">
+            <i class="bi bi-circle-fill me-1 small"></i> BSB: Berkembang Sangat Baik
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+        <div class="row g-3">
+            <% if @data_pertanyaan.present? %>
+            <% @data_pertanyaan.each_with_index do |data, i| %>
+                <% 
+                data_nilai = nil 
+                if @data_nilai.present?
+                    data_nilai = @data_nilai.find_by(pertanyaan_id: data.pertanyaan_id)
+                end
+                %>
+                <%= render 'shared/list_data_input_penilaian', 
+                    data: data, 
+                    index: i, 
+                    guru: @data_guru, 
+                    data_nilai: data_nilai,
+                    data_akun: @data_akun %>
+            <% end %> 
+            <% else %>
+            <div class="col-12 text-center py-5">
+                <div class="text-muted mb-3"><i class="bi bi-clipboard-x display-4"></i></div>
+                <p class="text-muted fw-medium">Belum ada data pertanyaan yang tersedia.</p>
+            </div>
+            <% end %> 
+        </div>
+    </div>
+  </div>
+  
+  <div style="height: 100px;"></div>
+
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+  <div id="saveToast" class="toast align-items-center text-bg-dark border-0 shadow-lg rounded-4" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center gap-2">
+        <i class="bi bi-check-circle-fill text-success fs-5"></i> 
+        <span class="fw-medium">Capaian berhasil disimpan!</span>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('turbo:load', function () {
+      updateProgress();
+      
+      const inputs = document.querySelectorAll('.input-nilai');
+      inputs.forEach(input => {
+          input.addEventListener('change', function() {
+              updateProgress();
+              updateCardStatus(this);
+          });
+      });
+  });
+
+  function updateCardStatus(inputElement) {
+      const card = inputElement.closest('.assessment-card');
+      const indicator = card.querySelector('.status-indicator');
+      
+      if(indicator) {
+          indicator.style.backgroundColor = '#198754'; 
+      }
+  }
+
+  function updateProgress() {
+    const totalQuestions = document.querySelectorAll('.assessment-card').length; 
+    
+    const checkedRadios = document.querySelectorAll('input[type="radio"]:checked');
+    const filledQuestions = checkedRadios.length;
+    const percent = totalQuestions === 0 ? 0 : Math.round((filledQuestions / totalQuestions) * 100);
+    
+    const progressBar = document.getElementById('progressBar');
+    if(progressBar) {
+        progressBar.style.width = percent + "%";
+        if(percent === 100) progressBar.classList.add('bg-success');
+    }
+
+    const txtLarge = document.getElementById('progressTextLarge');
+    if(txtLarge) txtLarge.innerText = percent + "%";
+    const txtMobile = document.getElementById('progressTextMobile');
+    if(txtMobile) txtMobile.innerText = percent + "%";
+  }
+</script>
+
+<style>
+  body {
+      background-color: #f8f9fa;
+  }
+
+  .assessment-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08)!important;
+  }
+  
+  .assessment-card:focus-within {
+      border-color: var(--bs-primary) !important;
+      box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08)!important;
+  }
+
+  .btn-check:checked + .btn-outline-danger {
+      background-color: #dc3545;
+      color: white;
+      box-shadow: 0 4px 6px rgba(220, 53, 69, 0.3);
+  }
+  .btn-check:checked + .btn-outline-warning {
+      background-color: #ffc107;
+      color: black;
+      box-shadow: 0 4px 6px rgba(255, 193, 7, 0.3);
+  }
+  .btn-check:checked + .btn-outline-primary {
+      background-color: #0d6efd;
+      color: white;
+      box-shadow: 0 4px 6px rgba(13, 110, 253, 0.3);
+  }
+  .btn-check:checked + .btn-outline-success {
+      background-color: #198754;
+      color: white;
+      box-shadow: 0 4px 6px rgba(25, 135, 84, 0.3);
+  }
+  
+  .object-fit-cover {
+      object-fit: cover;
+  }
+  
+  .hover-opacity-100:hover {
+      opacity: 1 !important;
+  }
+
+  .transition-all {
+      transition: all 0.2s ease;
+  }
+</style>

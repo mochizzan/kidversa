@@ -1,0 +1,97 @@
+<div class="col-12">
+  <div class="card border-0 shadow-sm rounded-4 mb-2 assessment-card position-relative overflow-hidden" id="card_<%= index %>" style="transition: all 0.3s ease;">
+    
+    <div class="status-indicator position-absolute top-0 start-0 bottom-0" 
+         style="width: 6px; background-color: <%= data_nilai&.pertanyaan_id.present? && data_nilai&.nilai.present? ? '#198754' : '#e9ecef' %>;">
+    </div>
+
+    <div class="card-body p-4 ps-4">
+      <form class="assessment-form" action="<%= simpan_penilaian_path %>" method="post">
+        <input name="token" type="hidden" value="<%= form_authenticity_token %>">
+        <input name="siswa_id" type="hidden" value="<%= @data_siswa.siswa_id %>">
+        <input name="pertanyaan_id" type="hidden" value="<%= data.pertanyaan_id %>"> 
+
+        <div class="row g-4">
+          <div class="col-lg-7 d-flex flex-column justify-content-center ps-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">
+                Indikator #<%= index + 1 %>
+              </span>
+            </div>
+            
+            <h5 class="fw-bold text-dark mb-3" style="line-height: 1.6; font-family: 'Plus Jakarta Sans', sans-serif;">
+              <%= data.nama_pertanyaan %>
+            </h5>
+
+            <div class="d-flex align-items-center gap-2 mt-auto">
+              <i class="bi bi-person-circle text-muted"></i>
+              <div class="position-relative" style="min-width: 200px;">
+                <select class="form-select form-select-sm border-0 bg-light fw-medium text-secondary py-1 ps-2" 
+                        name="guru_id" 
+                        style="cursor: pointer; border-radius: 8px;">
+                  <% guru.each do |g| %>
+                    <option value="<%= g.guru_id %>"
+                      <% if data_nilai.present? %>
+                        <%= g.guru_id == data_nilai.guru_id ? 'selected' : '' %>
+                      <% else %>
+                        <%= g.guru_id == @data_akun.guru_id ? 'selected' : '' %>
+                      <% end %>
+                    >
+                      <%= g.nama %>
+                    </option>
+                  <% end %>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="bg-light bg-opacity-50 rounded-4 p-3 border border-light">
+              <label class="d-block small text-muted fw-bold text-uppercase mb-3 text-center" style="letter-spacing: 1px; font-size: 0.7rem;">
+                Capaian Perkembangan
+              </label>
+
+              <div class="d-grid gap-2 mb-3">
+                <div class="btn-group w-100" role="group">
+                  
+                  <input type="radio" class="btn-check input-nilai" name="nilai_<%= index %>" id="btn_bb_<%= index %>" value="BB" required
+                    <%= data_nilai&.nilai == "BB" ? 'checked' : '' %>>
+                  <label class="btn btn-outline-danger py-2 rounded-start-3 fw-bold transition-all" for="btn_bb_<%= index %>">BB</label>
+
+                  <input type="radio" class="btn-check input-nilai" name="nilai_<%= index %>" id="btn_mb_<%= index %>" value="MB"
+                    <%= data_nilai&.nilai == "MB" ? 'checked' : '' %>>
+                  <label class="btn btn-outline-warning py-2 fw-bold transition-all" for="btn_mb_<%= index %>">MB</label>
+
+                  <input type="radio" class="btn-check input-nilai" name="nilai_<%= index %>" id="btn_bsh_<%= index %>" value="BSH"
+                    <%= data_nilai&.nilai == "BSH" ? 'checked' : '' %>>
+                  <label class="btn btn-outline-primary py-2 fw-bold transition-all" for="btn_bsh_<%= index %>">BSH</label>
+
+                  <input type="radio" class="btn-check input-nilai" name="nilai_<%= index %>" id="btn_bsb_<%= index %>" value="BSB"
+                    <%= data_nilai&.nilai == "BSB" ? 'checked' : '' %>>
+                  <label class="btn btn-outline-success py-2 rounded-end-3 fw-bold transition-all" for="btn_bsb_<%= index %>">BSB</label>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center gap-2">
+                 <button id="btn-reset-penilaian" 
+                        type="submit"
+                        method="post"
+                        formaction="<%= reset_penilaian_path(siswa_id: @data_siswa.siswa_id, pertanyaan_id: data.pertanyaan_id) %>"
+                        formnovalidate
+                        class="btn btn-link text-muted text-decoration-none btn-sm p-0 d-flex align-items-center gap-1 opacity-75 hover-opacity-100" 
+                        title="Reset Nilai">
+                  <i class="bi bi-arrow-counterclockwise"></i> <span style="font-size: 0.8rem;">Reset</span>
+                </button>
+
+                <button type="submit" class="btn btn-dark btn-sm rounded-pill px-4 shadow-sm btn-save d-flex align-items-center gap-2" title="Simpan Nilai">
+                  <i class="bi bi-save"></i> <span>Simpan</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

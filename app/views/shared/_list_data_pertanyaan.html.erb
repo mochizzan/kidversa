@@ -1,0 +1,38 @@
+<div class="col-12">
+  <div class="card border-0 shadow-sm rounded-4 hover-border overflow-hidden">
+    
+    <div class="position-absolute top-0 start-0 bottom-0 <%= bg %>" style="width: 6px;"></div>
+
+    <div class="card-body p-4 ps-4"> 
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        
+        <div class="flex-grow-1 ps-2">
+          <h5 class="fw-bold text-dark mb-0" style="line-height: 1.6;">
+            <%= data.nama_pertanyaan %>
+          </h5>
+        </div>
+
+        <div class="d-flex flex-row flex-md-column gap-2 align-items-stretch" style="min-width: 140px;">
+          
+          <button class="btn btn-light text-warning border btn-sm rounded-pill px-3 fw-bold w-100 py-2 d-flex align-items-center justify-content-center"
+                  data-bs-toggle="modal" 
+                  data-bs-target="#modalEditPertanyaan"
+                  data-id="<%= data.pertanyaan_id %>"
+                  data-isi="<%= data.nama_pertanyaan %>">
+            <i class="bi bi-pencil-fill me-2"></i> Edit
+          </button>
+
+          <button class="btn btn-light text-danger border btn-sm rounded-pill px-3 fw-bold w-100 py-2 d-flex align-items-center justify-content-center"
+                  data-bs-toggle="modal" 
+                  data-bs-target="#deleteModal"
+                  data-delete-url="<%= delete_data_pertanyaan_path(pertanyaan_id: data.pertanyaan_id) %>"
+                  data-message="Yakin ingin menghapus indikator ini?">
+            <i class="bi bi-trash-fill me-2"></i> Hapus
+          </button>
+          
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

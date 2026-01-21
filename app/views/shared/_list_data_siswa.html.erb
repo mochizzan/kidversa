@@ -1,0 +1,91 @@
+<tr>
+  <td class="ps-4 py-3">
+    <div class="d-flex align-items-center">
+      <img src="<%= data.profile_path.present? ? data.profile_path : "https://ui-avatars.com/api/?name=#{data.nama}&background=random" %>" 
+           class="rounded-circle me-3 border shadow-sm" 
+           width="45" height="45" 
+           style="object-fit: cover;"
+           alt="Avatar">
+      
+      <div>
+        <div class="fw-bold text-dark"><%= data.nama %></div>
+        <div class="small text-muted d-flex align-items-center">
+          <i class="bi bi-upc-scan me-1"></i> <%= data.nisn %>
+        </div>
+      </div>
+    </div>
+  </td>
+
+  <td>
+    <div class="d-flex flex-column">
+      <span class="fw-bold text-dark"><%= data.usia %> Tahun</span>
+      <span class="text-muted small">
+        <i class="bi bi-calendar-event me-1"></i><%= data.tanggal_lahir %>
+      </span>
+    </div>
+  </td>
+
+  <td>
+    <% if data.kelompok_usia == 'A' %>
+      <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-3 py-2">
+        Kelompok A
+      </span>
+    <% else %>
+      <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2">
+        Kelompok B
+      </span>
+    <% end %>
+  </td>
+
+  <td>
+    <div class="d-flex align-items-center text-secondary">
+      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 25px; height: 25px;">
+        <i class="bi bi-person-badge small"></i>
+      </div>
+      <span><%= data.guru.nama %></span>
+    </div>
+  </td>
+
+  <td class="pe-4 text-end">
+    <div class="d-flex justify-content-end gap-2">
+      
+      <a href="#" class="btn btn-light text-warning border-0 btn-sm rounded-circle d-flex align-items-center justify-content-center shadow-sm hover-scale" 
+         style="width: 35px; height: 35px;"
+
+         data-bs-toggle="modal" 
+         data-bs-target="#modalEditSiswa"
+
+         data-id="<%= data.siswa_id %>" 
+         data-nisn="<%= data.nisn %>"
+         data-nama="<%= data.nama %>"
+         data-guru="<%= data.guru.nama %>"
+         data-alamat="<%= data.alamat %>"
+         data-nama-lembaga="<%= data.nama_lembaga %>"
+         
+         data-tgl-lahir="<%= data.tanggal_lahir %>"
+         data-usia="<%= data.usia %>"
+         data-kelompok="<%= data.kelompok_usia %>"
+
+         data-nama-ayah="<%= data.orang_tua.nama_ayah %>"
+         data-nama-ibu="<%= data.orang_tua.nama_ibu %>"
+         data-pekerjaan-ayah="<%= data.orang_tua.pekerjaan_ayah %>"
+         data-pekerjaan-ibu="<%= data.orang_tua.pekerjaan_ibu %>"
+         >
+        <i class="bi bi-pencil-fill"></i>
+      </a>
+
+      <a href="#" class="btn btn-light text-danger border-0 btn-sm rounded-circle d-flex align-items-center justify-content-center shadow-sm hover-scale" 
+         style="width: 35px; height: 35px;" 
+         
+         data-bs-toggle="modal" 
+         data-bs-target="#deleteModal"
+         
+         data-delete-message="Apakah Anda yakin ingin menghapus data siswa <%= data.nama %> ?"
+         data-delete-url="<%= hapus_data_siswa_path(siswa_id: data.siswa_id) %>">
+        
+        <i class="bi bi-trash-fill"></i>
+      </a>
+      
+    </div>
+  </td>
+</tr>

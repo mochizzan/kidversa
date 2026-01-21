@@ -1,0 +1,92 @@
+<div class="modal fade" id="modalMigrasiSiswa" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow rounded-4">
+      
+      <div class="modal-header bg-success bg-opacity-10 border-bottom-0 py-3">
+        <div class="d-flex align-items-center">
+          <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+            <i class="bi bi-arrow-repeat fs-5"></i>
+          </div>
+          <div>
+            <h5 class="modal-title fw-bold text-dark">Migrasi Siswa Lama</h5>
+            <p class="mb-0 text-muted small">Pilih siswa yang melanjutkan ke T.A <%= @tahun_ajaran_aktif %></p>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <%= form_with url: migrasi_data_siswa_path, method: :post do |f| %>
+        <div class="modal-body p-0">
+          <div class="p-3 bg-light border-bottom d-flex align-items-center">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="checkAllSiswa">
+              <label class="form-check-label fw-bold small text-uppercase" for="checkAllSiswa">
+                Pilih Semua Siswa
+              </label>
+            </div>
+            <div class="ms-auto">
+               <input type="text" id="searchMigrasi" class="form-control form-control-sm" placeholder="Cari nama siswa...">
+            </div>
+          </div>
+
+          <div class="list-group list-group-flush p-2" style="max-height: 400px; overflow-y: auto;">
+            <% if @siswa_lama.present? %>
+              <% @siswa_lama.each do |siswa| %>
+                <label class="list-group-item d-flex align-items-center gap-3 border-0 py-3 rounded-3 hover-bg-light cursor-pointer search-item">
+                  <div class="form-check">
+                    <%= check_box_tag "siswa_ids[]", siswa.id, false, class: "form-check-input check-item", style: "transform: scale(1.2);" %>
+                  </div>
+                  
+                  <img src="<%= siswa.profile_path.present? ? siswa.profile_path : "https://ui-avatars.com/api/?name=#{siswa.nama}" %>" class="rounded-circle" width="40" height="40">
+                  
+                  <div class="w-100">
+                    <div class="d-flex justify-content-between">
+                      <span class="fw-bold text-dark nama-siswa"><%= siswa.nama %></span>
+                      <span class="badge bg-secondary bg-opacity-10 text-secondary"><%= siswa.kelompok_usia %> (Lama)</span>
+                    </div>
+                    <div class="small text-muted">NISN: <%= siswa.nisn %></div>
+                  </div>
+                </label>
+              <% end %>
+            <% else %>
+               <div class="text-center py-4 text-muted small">Tidak ada data siswa lama yang bisa dimigrasi.</div>
+            <% end %>
+          </div>
+          
+          <div class="p-4 bg-light border-top">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold small">Pindahkan ke Kelompok:</label>
+                <%= select_tag :target_kelompok, options_for_select(['A', 'B']), prompt: "Sesuai Data Lama", class: "form-select" %>
+                <div class="form-text x-small">Biarkan kosong jika kelompok tidak berubah.</div>
+              </div>
+              <div class="col-md-6">
+                 <label class="form-label fw-bold small">Nama Lembaga:</label>
+                 <%= text_field_tag :nama_lembaga, nil, class: "form-control", placeholder: "Nama Lembaga Baru..." %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top-0 px-4 pb-4">
+          <button type="button" class="btn btn-light rounded-pill px-4 fw-bold text-secondary" data-bs-dismiss="modal">Batal</button>
+          <%= button_tag "Proses Migrasi", type: :submit, class: "btn btn-success rounded-pill px-5 fw-bold shadow-sm" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('checkAllSiswa').addEventListener('change', function() {
+    document.querySelectorAll('.check-item').forEach(cb => cb.checked = this.checked);
+  });
+
+  document.getElementById('searchMigrasi').addEventListener('keyup', function() {
+    let filter = this.value.toLowerCase();
+    document.querySelectorAll('.search-item').forEach(item => {
+      let text = item.querySelector('.nama-siswa').textContent.toLowerCase();
+      item.style.display = text.includes(filter) ? "" : "none";
+    });
+  });
+</script>

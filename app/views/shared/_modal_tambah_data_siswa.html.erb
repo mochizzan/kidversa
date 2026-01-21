@@ -1,0 +1,184 @@
+<div class="modal fade" id="modalTambahSiswa" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow rounded-4">
+      
+      <div class="modal-header bg-primary bg-opacity-10 border-bottom-0 py-3">
+        <div class="d-flex align-items-center">
+          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+            <i class="bi bi-person-plus-fill fs-5"></i>
+          </div>
+          <div>
+            <h5 class="modal-title fw-bold text-dark" id="modalLabel">Tambah Siswa Baru</h5>
+            <p class="mb-0 text-muted small">Isi data siswa dengan lengkap dan benar.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <%= form_with url: tambah_data_siswa_path, scope: :data_siswa, multipart: true do |f| %>
+
+      <%= f.hidden_field :tahun_ajaran, value: @tahun_ajaran_aktif %>
+
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          
+          <div class="col-12 col-md-6">
+            <label for="inputNISN" class="form-label fw-bold text-secondary small text-uppercase">NISN / NIS</label>
+            <%= f.number_field :nisn, 
+                class: "form-control form-control-lg bg-light", 
+                id: "inputNISN", 
+                placeholder: "Contoh: 12345678", 
+                required: true %>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="inputNama" class="form-label fw-bold text-secondary small text-uppercase">Nama Lengkap</label>
+            <%= f.text_field :nama, 
+                class: "form-control form-control-lg bg-light", 
+                id: "inputNama", 
+                placeholder: "Nama sesuai Akta", 
+                required: true %>
+          </div>
+
+          <div class="col-12 col-md-5">
+            <label for="inputTanggalLahir" class="form-label fw-bold text-secondary small text-uppercase">Tanggal Lahir</label>
+            <%= f.date_field :tanggal_lahir, 
+                class: "form-control form-control-lg bg-light", 
+                id: "inputTanggalLahir", 
+                required: true,
+                onchange: "hitungUsia()" %> 
+          </div>
+
+          <div class="col-6 col-md-3">
+            <label for="inputUsia" class="form-label fw-bold text-secondary small text-uppercase">Usia</label>
+            <div class="input-group input-group-lg">
+              <%= f.number_field :usia, 
+                  class: "form-control bg-light", 
+                  id: "inputUsia", 
+                  placeholder: "0", 
+                  required: true %>
+              <span class="input-group-text bg-light text-muted fs-6">Thn</span>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-4">
+            <label for="selectKelompok" class="form-label fw-bold text-secondary small text-uppercase">Kelompok</label>
+            <%= f.select :kelompok_usia, 
+                ['A', 'B'], 
+                { prompt: "-- Pilih --" }, 
+                { class: "form-select form-select-lg bg-light", id: "selectKelompok", required: true } 
+            %>
+          </div>
+
+          <div class="col-12">
+            <label for="inputGuru" class="form-label fw-bold text-secondary small text-uppercase">Nama Guru / Wali Kelas</label>
+            <%= f.text_field :nama_guru, 
+                class: "form-control form-control-lg bg-light", 
+                id: "inputGuru", 
+                value: @nama_guru %> 
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="inputLembaga" class="form-label fw-bold text-secondary small text-uppercase">Nama Lembaga</label>
+            <%= f.text_field :nama_lembaga, class: "form-control form-control-lg bg-light", id: "inputLembaga", placeholder: "Contoh: PAUD Melati", required: true %>
+          </div>
+
+          <div class="col-12">
+            <label for="inputAlamat" class="form-label fw-bold text-secondary small text-uppercase">Alamat Lengkap</label>
+            <%= f.text_area :alamat, class: "form-control bg-light", id: "inputAlamat", rows: 2, placeholder: "Alamat domisili siswa...", required: true %>
+          </div>
+
+          
+
+          <div class="col-12 mt-4">
+             <h6 class="fw-bold text-primary border-bottom pb-2 mb-0">
+               <i class="bi bi-people-fill me-2"></i>Data Orang Tua
+             </h6>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="inputNamaAyah" class="form-label fw-bold text-secondary small text-uppercase">Nama Ayah</label>
+            <%= f.text_field :nama_ayah, 
+                class: "form-control form-control-lg bg-light", 
+                id: "inputNamaAyah", 
+                placeholder: "Nama Ayah Kandung", 
+                required: true %>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="inputPekerjaanAyah" class="form-label fw-bold text-secondary small text-uppercase">Pekerjaan Ayah</label>
+            <%= f.text_field :pekerjaan_ayah, 
+                class: "form-control form-control-lg bg-light", 
+                id: "inputPekerjaanAyah", 
+                placeholder: "Contoh: Wiraswasta" %>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="inputNamaIbu" class="form-label fw-bold text-secondary small text-uppercase">Nama Ibu</label>
+            <%= f.text_field :nama_ibu, 
+                class: "form-control form-control-lg bg-light", 
+                id: "inputNamaIbu", 
+                placeholder: "Nama Ibu Kandung", 
+                required: true %>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="inputPekerjaanIbu" class="form-label fw-bold text-secondary small text-uppercase">Pekerjaan Ibu</label>
+            <%= f.text_field :pekerjaan_ibu, 
+                class: "form-control form-control-lg bg-light", 
+                id: "inputPekerjaanIbu", 
+                placeholder: "Contoh: Ibu Rumah Tangga" %>
+          </div>
+          <div class="col-12 mt-4">
+            <div class="alert alert-light border border-dashed d-flex align-items-center mb-0" role="alert">
+              <i class="bi bi-camera-fill text-primary fs-4 me-3"></i>
+              
+              <div class="w-100">
+                <label for="inputFoto" class="form-label fw-bold text-dark mb-1">Upload Foto Siswa</label>
+                
+                <%= f.file_field :profile_path,
+                    id: "inputFoto",
+                    class: "form-control form-control-sm", 
+                    accept: "image/png, image/jpeg"
+                %>
+                
+                <div class="small text-muted mt-1">Format: JPG atau PNG. Maksimal 3MB.</div>
+              </div>
+            </div>
+          </div>
+
+        </div> 
+      </div>
+
+      <div class="modal-footer border-top-0 px-4 pb-4">
+        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold text-secondary" data-bs-dismiss="modal">
+          Batal
+        </button>
+        
+        <%= f.submit "Simpan Data", class: "btn btn-primary rounded-pill px-5 fw-bold shadow-sm" %>
+      </div>
+
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  function hitungUsia() {
+    const tanggalLahirInput = document.getElementById('inputTanggalLahir').value;
+    const usiaInput = document.getElementById('inputUsia');
+
+    if (tanggalLahirInput) {
+      const today = new Date();
+      const birthDate = new Date(tanggalLahirInput);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      usiaInput.value = age;
+    }
+  }
+</script>

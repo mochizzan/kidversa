@@ -1,0 +1,179 @@
+<div class="modal fade" id="modalEditSiswa" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow rounded-4">
+      
+      <div class="modal-header bg-warning bg-opacity-10 border-bottom-0 py-3">
+        <div class="d-flex align-items-center">
+          <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+            <i class="bi bi-pencil-fill fs-5"></i>
+          </div>
+          <div>
+            <h5 class="modal-title fw-bold text-dark">Edit Data Siswa</h5>
+            <p class="mb-0 text-muted small">Perbarui informasi data siswa & orang tua.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <%= form_with url: edit_data_siswa_path, method: :post, multipart: true, id: "formEditSiswa" do |f| %>
+        
+        <%= hidden_field_tag :siswa_id, nil, id: "edit-siswa-id" %>
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            
+            <div class="col-12 col-md-6">
+              <label for="editNISN" class="form-label fw-bold text-secondary small text-uppercase">NISN / NIS</label>
+              <%= number_field_tag :nisn, nil, id: "editNISN", class: "form-control form-control-lg bg-light", placeholder: "12345678", required: true %>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="editNama" class="form-label fw-bold text-secondary small text-uppercase">Nama Lengkap</label>
+              <%= text_field_tag :nama, nil, id: "editNama", class: "form-control form-control-lg bg-light", placeholder: "Nama Siswa", required: true %>
+            </div>
+
+            <div class="col-12 col-md-5">
+              <label for="editTanggalLahir" class="form-label fw-bold text-secondary small text-uppercase">Tanggal Lahir</label>
+              <%= date_field_tag :tanggal_lahir, nil, id: "editTanggalLahir", class: "form-control form-control-lg bg-light", required: true, onchange: "hitungUsiaEdit()" %>
+            </div>
+
+            <div class="col-6 col-md-3">
+              <label for="editUsia" class="form-label fw-bold text-secondary small text-uppercase">Usia</label>
+              <div class="input-group input-group-lg">
+                <%= number_field_tag :usia, nil, id: "editUsia", class: "form-control bg-light", placeholder: "0", required: true %>
+                <span class="input-group-text bg-light text-muted fs-6">Thn</span>
+              </div>
+            </div>
+
+            <div class="col-6 col-md-4">
+              <label for="editKelompok" class="form-label fw-bold text-secondary small text-uppercase">Kelompok</label>
+              <%= select_tag :kelompok_usia, 
+                  options_for_select([["Kelompok A", "A"], ["Kelompok B", "B"]]), 
+                  prompt: "-- Pilih --", 
+                  id: "editKelompok", 
+                  class: "form-select form-select-lg bg-light", 
+                  required: true %>
+            </div>
+
+            <div class="col-12">
+              <label for="editGuru" class="form-label fw-bold text-secondary small text-uppercase">Nama Guru / Wali Kelas</label>
+              <%= text_field_tag :nama_guru, nil, id: "editGuru", class: "form-control form-control-lg bg-light" %>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="editLembaga" class="form-label fw-bold text-secondary small text-uppercase">Nama Lembaga</label>
+              <%= text_field_tag :nama_lembaga, nil, id: "editLembaga", class: "form-control form-control-lg bg-light", required: true %>
+            </div>
+
+            <div class="col-12">
+              <label for="editAlamat" class="form-label fw-bold text-secondary small text-uppercase">Alamat Lengkap</label>
+              <%= text_area_tag :alamat, nil, id: "editAlamat", class: "form-control bg-light", rows: 2, required: true %>
+            </div>
+
+            <div class="col-12 mt-4">
+               <h6 class="fw-bold text-warning border-bottom border-warning pb-2 mb-0">
+                 <i class="bi bi-people-fill me-2"></i>Data Orang Tua
+               </h6>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="editNamaAyah" class="form-label fw-bold text-secondary small text-uppercase">Nama Ayah</label>
+              <%= text_field_tag :nama_ayah, nil, id: "editNamaAyah", class: "form-control form-control-lg bg-light", required: true %>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="editPekerjaanAyah" class="form-label fw-bold text-secondary small text-uppercase">Pekerjaan Ayah</label>
+              <%= text_field_tag :pekerjaan_ayah, nil, id: "editPekerjaanAyah", class: "form-control form-control-lg bg-light" %>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="editNamaIbu" class="form-label fw-bold text-secondary small text-uppercase">Nama Ibu</label>
+              <%= text_field_tag :nama_ibu, nil, id: "editNamaIbu", class: "form-control form-control-lg bg-light", required: true %>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="editPekerjaanIbu" class="form-label fw-bold text-secondary small text-uppercase">Pekerjaan Ibu</label>
+              <%= text_field_tag :pekerjaan_ibu, nil, id: "editPekerjaanIbu", class: "form-control form-control-lg bg-light" %>
+            </div>
+
+            <div class="col-12 mt-4">
+              <div class="alert alert-light border border-dashed d-flex align-items-center mb-0" role="alert">
+                <i class="bi bi-camera-fill text-warning fs-4 me-3"></i>
+                <div class="w-100">
+                  <label for="editFoto" class="form-label fw-bold text-dark mb-1">Ganti Foto Siswa (Opsional)</label>
+                  <%= file_field_tag :profile_path, id: "editFoto", class: "form-control form-control-sm", accept: "image/png, image/jpeg" %>
+                  <div class="small text-muted mt-1">Biarkan kosong jika tidak ingin mengganti foto.</div>
+                </div>
+              </div>
+            </div>
+
+          </div> 
+        </div>
+
+        <div class="modal-footer border-top-0 px-4 pb-4">
+          <button type="button" class="btn btn-light rounded-pill px-4 fw-bold text-secondary" data-bs-dismiss="modal">Batal</button>
+          <%= button_tag "Simpan Perubahan", type: :submit, class: "btn btn-warning rounded-pill px-5 fw-bold shadow-sm" %>
+        </div>
+
+      <% end %>
+      </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('turbo:load', function () {
+    const modalEdit = document.getElementById('modalEditSiswa');
+    
+    if (modalEdit) {
+      modalEdit.addEventListener('show.bs.modal', function (e) {
+        const button = e.relatedTarget;
+
+        const id = button.getAttribute('data-id');
+        const nisn = button.getAttribute('data-nisn');
+        const nama = button.getAttribute('data-nama');
+        const tglLahir = button.getAttribute('data-tanggal-lahir');
+        const usia = button.getAttribute('data-usia');
+        const kelompok = button.getAttribute('data-kelompok');
+        const guru = button.getAttribute('data-guru');
+        const namaLembaga = button.getAttribute('data-nama-lembaga');
+        const alamat = button.getAttribute('data-alamat');
+        
+        const namaAyah = button.getAttribute('data-nama-ayah');
+        const pekerjanAyah = button.getAttribute('data-pekerjaan-ayah');
+        const namaIbu = button.getAttribute('data-nama-ibu');
+        const pekerjaanIbu = button.getAttribute('data-pekerjaan-ibu');
+
+        document.getElementById('edit-siswa-id').value = id;
+        document.getElementById('editNISN').value = nisn;
+        document.getElementById('editNama').value = nama;
+        document.getElementById('editTanggalLahir').value = tglLahir;
+        document.getElementById('editUsia').value = usia;
+        document.getElementById('editKelompok').value = kelompok;
+        document.getElementById('editGuru').value = guru;
+        document.getElementById('editLembaga').value = namaLembaga;
+        document.getElementById('editAlamat').value = alamat;
+        
+        document.getElementById('editNamaAyah').value = namaAyah;
+        document.getElementById('editPekerjaanAyah').value = pekerjanAyah;
+        document.getElementById('editNamaIbu').value = namaIbu;
+        document.getElementById('editPekerjaanIbu').value = pekerjaanIbu;
+      });
+    }
+  });
+
+  function hitungUsiaEdit() {
+    const tanggalLahirInput = document.getElementById('editTanggalLahir').value;
+    const usiaInput = document.getElementById('editUsia');
+
+    if (tanggalLahirInput) {
+      const today = new Date();
+      const birthDate = new Date(tanggalLahirInput);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      usiaInput.value = age;
+    }
+  }
+</script>
