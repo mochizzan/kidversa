@@ -8,8 +8,8 @@
             <i class="bi bi-person-plus-fill fs-5"></i>
           </div>
           <div>
-            <h5 class="modal-title fw-bold text-dark" id="modalLabel">Tambah Siswa Baru</h5>
-            <p class="mb-0 text-muted small">Isi data siswa dengan lengkap dan benar.</p>
+            <h5 class="modal-title fw-bold text-dark" id="modalLabel">Tambah Data Baru</h5>
+            <p class="mb-0 text-muted small">Isi data anak dengan lengkap dan benar.</p>
           </div>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -85,7 +85,7 @@
 
           <div class="col-12">
             <label for="inputAlamat" class="form-label fw-bold text-secondary small text-uppercase">Alamat Lengkap</label>
-            <%= f.text_area :alamat, class: "form-control bg-light", id: "inputAlamat", rows: 2, placeholder: "Alamat domisili siswa...", required: true %>
+            <%= f.text_area :alamat, class: "form-control bg-light", id: "inputAlamat", rows: 2, placeholder: "Alamat domisili anak...", required: true %>
           </div>
 
           
@@ -134,7 +134,7 @@
               <i class="bi bi-camera-fill text-primary fs-4 me-3"></i>
               
               <div class="w-100">
-                <label for="inputFoto" class="form-label fw-bold text-dark mb-1">Upload Foto Siswa</label>
+                <label for="inputFoto" class="form-label fw-bold text-dark mb-1">Upload Foto Anak</label>
                 
                 <%= f.file_field :profile_path,
                     id: "inputFoto",

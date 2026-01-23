@@ -8,8 +8,8 @@
             <i class="bi bi-pencil-fill fs-5"></i>
           </div>
           <div>
-            <h5 class="modal-title fw-bold text-dark">Edit Data Siswa</h5>
-            <p class="mb-0 text-muted small">Perbarui informasi data siswa & orang tua.</p>
+            <h5 class="modal-title fw-bold text-dark">Edit Data Anak</h5>
+            <p class="mb-0 text-muted small">Perbarui informasi data anak & orang tua.</p>
           </div>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -28,7 +28,7 @@
 
             <div class="col-12 col-md-6">
               <label for="editNama" class="form-label fw-bold text-secondary small text-uppercase">Nama Lengkap</label>
-              <%= text_field_tag :nama, nil, id: "editNama", class: "form-control form-control-lg bg-light", placeholder: "Nama Siswa", required: true %>
+              <%= text_field_tag :nama, nil, id: "editNama", class: "form-control form-control-lg bg-light", placeholder: "Nama Anak", required: true %>
             </div>
 
             <div class="col-12 col-md-5">
@@ -99,7 +99,7 @@
               <div class="alert alert-light border border-dashed d-flex align-items-center mb-0" role="alert">
                 <i class="bi bi-camera-fill text-warning fs-4 me-3"></i>
                 <div class="w-100">
-                  <label for="editFoto" class="form-label fw-bold text-dark mb-1">Ganti Foto Siswa (Opsional)</label>
+                  <label for="editFoto" class="form-label fw-bold text-dark mb-1">Ganti Foto Anak (Opsional)</label>
                   <%= file_field_tag :profile_path, id: "editFoto", class: "form-control form-control-sm", accept: "image/png, image/jpeg" %>
                   <div class="small text-muted mt-1">Biarkan kosong jika tidak ingin mengganti foto.</div>
                 </div>

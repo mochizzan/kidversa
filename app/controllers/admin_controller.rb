@@ -271,13 +271,13 @@ class AdminController < ApplicationController
 
   def data_nilai
     search = params[:search]
-    @data_siswa = Siswa.joins(:status_penilaians).all
-
+    ta_aktif = TahunAjaran.find_by(is_active: 1)
+    scope = Siswa.where(tahun_ajaran_id: ta_aktif.id).order(nama: :asc)
     if search.present?
-      @data_siswa = Siswa.where("nisn LIKE ? OR nama LIKE ?", search, search)
-    else
-      @data_siswa = Siswa.all
+      keyword = "%#{search}%"
+      scope = scope.where("nisn LIKE ? OR nama LIKE ?", keyword, keyword)
     end
+    @data_siswa = scope.page(params[:page]).per(25)
   end
 
   def simpan_catatan

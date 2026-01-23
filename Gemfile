@@ -46,6 +46,8 @@ gem "wicked_pdf"
 
 gem "wkhtmltopdf-binary"
 
+gem "kaminari"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -64,8 +66,6 @@ group :development, :test do
   gem "solargraph"
 
   gem "fiddle"
-
-  gem "kaminari"
 end
 
 group :development do
