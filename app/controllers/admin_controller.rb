@@ -8,7 +8,7 @@ class AdminController < ApplicationController
     @semua_tahun_ajaran = TahunAjaran.order(id: :desc)
 
     @total_siswa = Siswa.where(tahun_ajaran_id: @tahun_ajaran_aktif.id).count
-    @total_pertanyaan = Pertanyaan.count
+    @total_pertanyaan = Pertanyaan.where(tahun_ajaran_id: @tahun_ajaran_aktif).count
 
     @nama_guru = data_guru.nama
 
@@ -92,7 +92,7 @@ class AdminController < ApplicationController
       tanggal_lahir: data_siswa[:tanggal_lahir],
       usia: data_siswa[:usia],
       kelompok_usia: data_siswa[:kelompok_usia],
-      lembaga: data_siswa[:nama_lembaga],
+      nama_lembaga: data_siswa[:nama_lembaga],
       alamat: data_siswa[:alamat],
       guru_id: guru_id,
       profile_path: profile_path,
@@ -189,6 +189,7 @@ class AdminController < ApplicationController
           update_params = {}
           update_params[:kelompok_usia] = target_kelompok if target_kelompok.present?
           update_params[:lembaga] = nama_lembaga if nama_lembaga.present?
+          update_params[:tahun_ajaran_id] = ta_aktif[:id]
 
           siswa.update(update_params) if update_params.any?
 
