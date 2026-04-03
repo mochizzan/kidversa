@@ -8,7 +8,7 @@ class User < ApplicationRecord
   validates :username, presence: true, uniqueness: true
   validates :password, presence: true, length: { minimum: 6 }
 
-  belongs_to :guru, foreign_key: "guru_id", optional: true
+  belongs_to :guru, foreign_key: "guru_id"
 
   before_create :generate_id
 

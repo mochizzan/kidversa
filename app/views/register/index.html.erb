@@ -1,0 +1,245 @@
+<div class="container py-5" style="max-width: 900px;">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Registrasi Akun Guru</h2>
+    <p class="text-muted">Silakan lengkapi data identitas dan akun Anda</p>
+  </div>
+
+  <%= form_with url: register_process_path, method: :post, id: "formRegisterGuru", html: { class: "needs-validation", novalidate: true } do |f| %>
+    
+    <div class="card shadow-sm mb-4 border-0" id="cardContainer1">
+      <div class="card-header bg-primary text-white py-3 d-flex align-items-center">
+        <span class="badge bg-white text-primary rounded-circle me-3 px-2 py-1 fs-6">1</span>
+        <h5 class="mb-0 fw-bold">Identitas Sekolah & Pendidik</h5>
+      </div>
+      
+      <div class="card-body p-4 collapse show" id="collapseContainer1">
+        
+        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">A. Identitas Sekolah</h6>
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Nama Sekolah <span class="text-danger">*</span></label>
+            <input type="text" name="nama_sekolah" list="listSekolah" class="form-control required-step-1" placeholder="Mulai ketik atau pilih sekolah..." required autocomplete="off">
+            <datalist id="listSekolah">
+              <% @lembagas&.each do |lembaga| %>
+                <option value="<%= lembaga.nama_lembaga %>"></option>
+              <% end %>
+            </datalist>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Alamat Sekolah <span class="text-danger">*</span></label>
+            <textarea name="alamat_sekolah" class="form-control required-step-1" rows="2" placeholder="Alamat lengkap sekolah" required></textarea>
+          </div>
+        </div>
+
+        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">B. Identitas Pendidik</h6>
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Nama Lengkap<span class="text-danger">*</span></label>
+            <input type="text" name="nama_lengkap" class="form-control required-step-1" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">NIK <span class="text-danger">*</span></label>
+            <input type="number" name="nik" class="form-control required-step-1" required>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label fw-medium">Jenis Kelamin <span class="text-danger">*</span></label>
+            <select class="form-select required-step-1" name="jenis_kelamin" required>
+              <option value="" selected disabled>Pilih...</option>
+              <option value="L">Laki-laki (L)</option>
+              <option value="P">Perempuan (P)</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-medium">Tempat Lahir <span class="text-danger">*</span></label>
+            <input type="text" name="tempat_lahir" class="form-control required-step-1" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-medium">Tanggal Lahir <span class="text-danger">*</span></label>
+            <input type="date" name="tanggal_lahir" class="form-control required-step-1" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Nama Ibu Kandung <span class="text-danger">*</span></label>
+            <input type="text" name="nama_ibu_kandung" class="form-control required-step-1" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Agama <span class="text-danger">*</span></label>
+            <select name="agama" class="form-select required-step-1" required>
+              <option value="" selected disabled>Pilih...</option>
+              <option value="Islam">Islam</option>
+              <option value="Kristen">Kristen</option>
+              <option value="Katolik">Katolik</option>
+              <option value="Hindu">Hindu</option>
+              <option value="Buddha">Buddha</option>
+              <option value="Konghucu">Konghucu</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-medium">Alamat Tempat Tinggal <span class="text-danger">*</span></label>
+            <textarea name="alamat_tempat_tinggal" class="form-control required-step-1" rows="2" placeholder="Sesuai KTP" required></textarea>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-medium">NPWP <span class="text-danger">*</span></label>
+            <input type="text" name="npwp" class="form-control required-step-1" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Nama Wajib Pajak <span class="text-danger">*</span></label>
+            <input type="text" name="nama_wajib_pajak" class="form-control required-step-1" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Kewarganegaraan <span class="text-danger">*</span></label>
+            <select name="kewarganegaraan" class="form-select required-step-1" required>
+              <option value="" selected disabled>Pilih...</option>
+              <option value="WNI">Warga Negara Indonesia (WNI)</option>
+              <option value="WNA">Warga Negara Asing (WNA)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Status Perkawinan <span class="text-danger">*</span></label>
+            <select name="status_perkawinan" class="form-select required-step-1" required>
+              <option value="" selected disabled>Pilih...</option>
+              <option value="Belum Kawin">Belum Kawin</option>
+              <option value="Kawin">Kawin</option>
+              <option value="Cerai Hidup">Cerai Hidup</option>
+              <option value="Cerai Mati">Cerai Mati</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-4">
+        <a href="<%= login_path %>" class="btn btn-outline-danger px-4 py-2">
+            <i class="bi bi-box-arrow-left me-2"></i> Batal & Kembali
+        </a>
+
+        <button type="button" class="btn btn-primary px-4 py-2" id="btnNextStep" disabled>
+            Lanjut Buat Akun <i class="bi bi-arrow-down-circle ms-2"></i>
+        </button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 opacity-50 transition-all" id="cardContainer2" style="transition: all 0.4s ease-in-out;">
+      <div class="card-header bg-secondary text-white py-3 d-flex align-items-center" id="headerContainer2">
+        <span class="badge bg-white text-secondary rounded-circle me-3 px-2 py-1 fs-6" id="badgeContainer2">
+          <i class="bi bi-lock-fill" id="lockIcon"></i>
+        </span>
+        <h5 class="mb-0 fw-bold">Pengaturan Akun Login</h5>
+      </div>
+      
+      <div class="card-body p-4 collapse" id="collapseContainer2">
+        <div class="row g-3 mb-4">
+          <div class="col-md-12">
+            <label class="form-label fw-medium">Username <span class="text-danger">*</span></label>
+            <input type="text" name="username" class="form-control" id="inputUsername" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Password <span class="text-danger">*</span></label>
+            <input type="password" name="password" class="form-control" id="inputPassword" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Ulangi Password <span class="text-danger">*</span></label>
+            <input type="password" name="password_confirm" class="form-control" id="inputPasswordConfirm" required>
+            <div class="invalid-feedback">Password tidak cocok!</div>
+          </div>
+        </div>
+
+        <div class="alert alert-warning border-warning d-flex align-items-center mb-4">
+          <div class="form-check m-0">
+            <input class="form-check-input border-warning" style="transform: scale(1.3); margin-top: 5px; margin-right: 15px;" type="checkbox" id="checkPersetujuan" required>
+            <label class="form-check-label fw-bold text-dark" for="checkPersetujuan">
+              Saya yakin informasi data yang saya isi di atas sudah sesuai dan benar.
+            </label>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+          <button type="button" class="btn btn-outline-secondary px-4 me-md-2" id="btnBackStep">
+            <i class="bi bi-arrow-up-circle me-2"></i> Kembali
+          </button>
+          <button type="submit" class="btn btn-success px-5 fw-bold text-uppercase">
+            <i class="bi bi-check2-circle me-2"></i> Daftar Sekarang
+          </button>
+        </div>
+      </div>
+    </div>
+
+  <% end %>
+</div>
+
+<script>
+  document.addEventListener('turbo:load', function () {
+    
+    const inputsStep1 = document.querySelectorAll('.required-step-1');
+    const btnNextStep = document.getElementById('btnNextStep');
+    const btnBackStep = document.getElementById('btnBackStep');
+    
+    const card2 = document.getElementById('cardContainer2');
+    const header2 = document.getElementById('headerContainer2');
+    const badge2 = document.getElementById('badgeContainer2');
+    const lockIcon = document.getElementById('lockIcon');
+    
+    const collapse1Element = document.getElementById('collapseContainer1');
+    const collapse2Element = document.getElementById('collapseContainer2');
+    const bsCollapse1 = new bootstrap.Collapse(collapse1Element, { toggle: false });
+    const bsCollapse2 = new bootstrap.Collapse(collapse2Element, { toggle: false });
+
+    function checkStep1Validity() {
+      let isValid = true;
+      inputsStep1.forEach(input => {
+        if (!input.checkValidity()) {
+          isValid = false;
+        }
+      });
+      btnNextStep.disabled = !isValid;
+    }
+
+    inputsStep1.forEach(input => {
+      input.addEventListener('input', checkStep1Validity);
+      input.addEventListener('change', checkStep1Validity);
+    });
+
+    btnNextStep.addEventListener('click', function() {
+      bsCollapse2.show();
+      bsCollapse1.hide();
+
+      card2.classList.remove('opacity-50');
+      header2.classList.replace('bg-secondary', 'bg-dark');
+      badge2.classList.replace('text-secondary', 'text-dark');
+      lockIcon.classList.replace('bi-lock-fill', 'bi-2-circle-fill');
+    });
+
+    btnBackStep.addEventListener('click', function() {
+      bsCollapse1.show();
+      bsCollapse2.hide();
+    });
+
+    const pwd = document.getElementById('inputPassword');
+    const pwdConfirm = document.getElementById('inputPasswordConfirm');
+    
+    pwdConfirm.addEventListener('input', function() {
+      if (pwd.value !== pwdConfirm.value) {
+        pwdConfirm.setCustomValidity('Password tidak cocok');
+        pwdConfirm.classList.add('is-invalid');
+      } else {
+        pwdConfirm.setCustomValidity('');
+        pwdConfirm.classList.remove('is-invalid');
+        pwdConfirm.classList.add('is-valid');
+      }
+    });
+
+    const form = document.getElementById('formRegisterGuru');
+    form.addEventListener('submit', function (event) {
+      if (!form.checkValidity() || pwd.value !== pwdConfirm.value) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+
+  });
+</script>

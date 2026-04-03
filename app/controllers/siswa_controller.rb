@@ -9,7 +9,7 @@ class SiswaController < ApplicationController
       return
     end
 
-    data_siswa = Siswa.joins(:guru).joins(:orang_tua).joins(:tahun_ajaran).find_by(nisn: nisn, nama_lembaga: nama_lembaga)
+    data_siswa = Siswa.joins(:guru, :orang_tua, :tahun_ajaran, :lembaga).find_by(nisn: nisn, lembaga: { nama_lembaga: nama_lembaga })
 
     if data_siswa.blank?
       redirect_to home_path

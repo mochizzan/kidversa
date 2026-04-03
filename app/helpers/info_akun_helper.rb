@@ -1,0 +1,2 @@
+module InfoAkunHelper
+end

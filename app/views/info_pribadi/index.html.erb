@@ -1,0 +1,164 @@
+<div class="container py-5" style="max-width: 900px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold m-0"><i class="bi bi-person-lines-fill text-primary me-2"></i> Informasi Pribadi</h3>
+    <button type="button" id="btnEditData" class="btn btn-outline-primary px-4">
+      <i class="bi bi-pencil-square me-2"></i> Edit Data
+    </button>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <%= form_with model: @guru, url: info_pribadi_update_path, method: :patch, id: "formInfoPribadi", local: true do |f| %>
+        
+        <h6 class="text-primary fw-bold border-bottom pb-2 mb-3">Identitas Pendidik</h6>
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Nama Lengkap</label>
+            <%= f.text_field :nama, class: "form-control input-readonly", readonly: true, required: true %>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">NIK</label>
+            <%= f.number_field :nik, class: "form-control input-readonly", readonly: true, required: true %>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label fw-medium">Jenis Kelamin</label>
+            <%= f.select :jenis_kelamin, [["Laki-laki (L)", "L"], ["Perempuan (P)", "P"]], { prompt: "Pilih..." }, { class: "form-select input-readonly", disabled: true, required: true } %>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-medium">Tempat Lahir</label>
+            <%= f.text_field :tempat_lahir, class: "form-control input-readonly", readonly: true, required: true %>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-medium">Tanggal Lahir</label>
+            <%= f.date_field :tanggal_lahir, class: "form-control input-readonly", readonly: true, required: true %>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Nama Ibu Kandung</label>
+            <%= f.text_field :nama_ibu_kandung, class: "form-control input-readonly", readonly: true, required: true %>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Agama</label>
+            <%= f.select :agama, ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu"], { prompt: "Pilih..." }, { class: "form-select input-readonly", disabled: true, required: true } %>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-medium">Alamat Tempat Tinggal</label>
+            <%= f.text_area :alamat_tempat_tinggal, class: "form-control input-readonly", rows: 2, readonly: true, required: true %>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-medium">NPWP</label>
+            <%= f.text_field :npwp, class: "form-control input-readonly", readonly: true, required: true %>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Nama Wajib Pajak</label>
+            <%= f.text_field :nama_wajib_pajak, class: "form-control input-readonly", readonly: true, required: true %>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Kewarganegaraan</label>
+            <%= f.select :kewarganegaraan, [["Warga Negara Indonesia (WNI)", "WNI"], ["Warga Negara Asing (WNA)", "WNA"]], { prompt: "Pilih..." }, { class: "form-select input-readonly", disabled: true, required: true } %>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Status Perkawinan</label>
+            <%= f.select :status_perkawinan, ["Belum Kawin", "Kawin", "Cerai Hidup", "Cerai Mati"], { prompt: "Pilih..." }, { class: "form-select input-readonly", disabled: true, required: true } %>
+          </div>
+        </div>
+
+        <h6 class="text-primary fw-bold border-bottom pb-2 mb-3 mt-5">Identitas Sekolah</h6>
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Nama Sekolah</label>
+            <%= f.text_field :nama_sekolah, class: "form-control input-readonly", readonly: true, required: true %>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Alamat Sekolah</label>
+            <%= f.text_area :alamat_sekolah, class: "form-control input-readonly", rows: 2, readonly: true, required: true %>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4 pt-3 border-top" id="containerBtnUpdate" style="display: none !important;">
+          <button type="button" id="btnCancelEdit" class="btn btn-light me-2 px-4 shadow-sm">Batal</button>
+          <button type="submit" class="btn btn-success px-5 fw-bold shadow-sm">
+            <i class="bi bi-save me-2"></i> Update Data
+          </button>
+        </div>
+
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('turbo:load', function() {
+    const btnEdit = document.getElementById('btnEditData');
+    const containerUpdate = document.getElementById('containerBtnUpdate');
+    const form = document.getElementById('formInfoPribadi');
+    const btnCancel = document.getElementById('btnCancelEdit');
+
+    if (!btnEdit || !form) return;
+
+    // We store initial values to detect changes
+    let initialValues = {};
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    function saveInitialValues() {
+      inputs.forEach(input => {
+        initialValues[input.name] = input.value;
+      });
+    }
+
+    function checkChanges() {
+      let isChanged = false;
+      inputs.forEach(input => {
+        if (initialValues[input.name] !== input.value) {
+          isChanged = true;
+        }
+      });
+      
+      if(isChanged) {
+        containerUpdate.style.display = 'flex';
+        containerUpdate.style.setProperty('display', 'flex', 'important');
+      } else {
+        containerUpdate.style.display = 'none';
+        containerUpdate.style.setProperty('display', 'none', 'important');
+      }
+    }
+
+    btnEdit.addEventListener('click', function() {
+      saveInitialValues();
+      inputs.forEach(input => {
+        if(input.tagName === 'SELECT') {
+          input.disabled = false;
+        } else {
+          input.removeAttribute('readonly');
+        }
+        input.classList.remove('bg-light');
+      });
+      btnEdit.style.display = 'none';
+      containerUpdate.style.display = 'flex'; // show update buttons
+      containerUpdate.style.setProperty('display', 'flex', 'important');
+    });
+
+    btnCancel.addEventListener('click', function() {
+      inputs.forEach(input => {
+        input.value = initialValues[input.name]; // restore
+        if(input.tagName === 'SELECT') {
+          input.disabled = true;
+        } else {
+          input.setAttribute('readonly', 'true');
+        }
+      });
+      btnEdit.style.display = 'block';
+      containerUpdate.style.display = 'none';
+      containerUpdate.style.setProperty('display', 'none', 'important');
+    });
+
+    inputs.forEach(input => {
+      input.addEventListener('input', checkChanges);
+      input.addEventListener('change', checkChanges);
+    });
+  });
+</script>

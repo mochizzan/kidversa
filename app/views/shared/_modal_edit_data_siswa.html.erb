@@ -61,7 +61,12 @@
 
             <div class="col-12 col-md-6">
               <label for="editLembaga" class="form-label fw-bold text-secondary small text-uppercase">Nama Lembaga</label>
-              <%= text_field_tag :nama_lembaga, nil, id: "editLembaga", class: "form-control form-control-lg bg-light", required: true %>
+              <%= text_field_tag :nama_lembaga, nil, list: "listLembagaEdit", id: "editLembaga", class: "form-control form-control-lg bg-light", placeholder: "Mulai ketik atau pilih sekolah...", required: true, autocomplete: "off" %>
+              <datalist id="listLembagaEdit">
+                <% @lembagas&.each do |lembaga| %>
+                  <option value="<%= lembaga.nama_lembaga %>"></option>
+                <% end %>
+              </datalist>
             </div>
 
             <div class="col-12">

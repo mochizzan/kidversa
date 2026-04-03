@@ -8,6 +8,8 @@ class PenilaianController < AdminController
     @data_pertanyaan = Pertanyaan.all
     @data_guru = Guru.all
     @data_nilai = NilaiSiswa.joins(:guru).joins(:pertanyaan).where(siswa_id: siswa_id)
+
+    @current_catatan = Siswa.where(siswa_id: siswa_id).pick(:catatan)
   end
 
   def simpan_penilaian
@@ -37,7 +39,6 @@ class PenilaianController < AdminController
     if current_nilai
       current_nilai.update(nilai: nilai, guru_id: guru_id)
       flash[:notice] = "Penilaian berhasil diperbarui."
-      redirect_to penilaian_path(siswa_id: siswa_id)
     else
       nilai_siswa = NilaiSiswa.new(
       siswa_id: siswa_id,
@@ -48,10 +49,8 @@ class PenilaianController < AdminController
     )
       if nilai_siswa.save
         flash[:notice] = "Penilaian berhasil disimpan."
-        redirect_to penilaian_path(siswa_id: siswa_id)
       else
         flash[:alert] = "Penilaian gagal disimpan."
-        redirect_to penilaian_path(siswa_id: siswa_id)
       end
     end
 
@@ -68,8 +67,13 @@ class PenilaianController < AdminController
         siswa_id: siswa_id,
         tahun_ajaran_id: ta_aktif.id
       )
+      is_complete = true
       end
+    else
+      is_complete = false
     end
+
+    redirect_to penilaian_path(siswa_id: siswa_id, is_complete: is_complete)
   end
 
   def reset_penilaian
@@ -84,5 +88,21 @@ class PenilaianController < AdminController
 
     redirect_to penilaian_path(siswa_id: siswa_id)
     flash[:notice] = "Penilaian berhasil direset."
+  end
+
+  def generate_catatan
+    siswa_id = params[:siswa_id]
+
+    current_catatan = Siswa.where(siswa_id: siswa_id).pick(:catatan)
+    puts "CURRENT CATATAN => #{current_catatan}"
+    if current_catatan.blank?
+      puts "GENERATE CATATAN"
+      @ai_message = OpenrouterController.index(siswa_id)
+      Siswa.find_by(siswa_id: siswa_id).update(catatan: @ai_message)
+    else
+      @ai_message = current_catatan
+    end
+
+    render turbo_stream: turbo_stream.update("modal-body-ai", @ai_message)
   end
 end

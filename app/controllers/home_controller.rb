@@ -6,7 +6,7 @@ class HomeController < ApplicationController
     nama_lembaga = params[:lembaga]
     nisn = params[:nisn]
 
-    data_siswa = Siswa.find_by(nisn: nisn&.strip, nama_lembaga: nama_lembaga&.strip.upcase)
+    data_siswa = Siswa.joins(:lembaga).find_by(nisn: nisn&.strip, lembaga: { nama_lembaga: nama_lembaga&.strip&.upcase })
 
     if data_siswa.present?
       redirect_to siswa_path(nama_lembaga: nama_lembaga, nisn: nisn)

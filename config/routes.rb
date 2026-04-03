@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  get "info_akun/index", as: :info_akun_index
+  patch "info_akun/update_password", as: :info_akun_update_password
+  get "info_pribadi/index", as: :info_pribadi_index
+  patch "info_pribadi/update", as: :info_pribadi_update
   scope "/admin" do
     get "index" => "admin#index", as: :admin
     get "data_nilai" => "admin#data_nilai", as: :data_nilai
@@ -10,6 +14,7 @@ Rails.application.routes.draw do
     get "penilaian/index" => "penilaian#index", as: :penilaian
     post "penilaian/simpan" => "penilaian#simpan_penilaian", as: :simpan_penilaian
     post "penilaian/reset" => "penilaian#reset_penilaian", as: :reset_penilaian
+    post "penilaian/generate_catatan" => "penilaian#generate_catatan", as: :generate_catatan
 
     get "data_siswa" => "admin#data_siswa", as: :data_siswa
     post "data_siswa/tambah_data_siswa" => "admin#tambah_data_siswa", as: :tambah_data_siswa
@@ -23,8 +28,10 @@ Rails.application.routes.draw do
     post "data_pertanyaan/delete_data_pertanyaan" => "admin#delete_data_pertanyaan", as: :delete_data_pertanyaan
   end
 
+  get "register/index" => "register#index", as: :register
   get "login/index" => "login#index", as: :login
   get "login/logout" => "login#destroy", as: :logout
+  post "register/process" => "register#daftar", as: :register_process
 
   get "home/index" => "home#index", as: :home
   get "home/cek_assesment" => "home#cek_assesment", as: :cek_assesment

@@ -1,16 +1,22 @@
 class Guru < ApplicationRecord
+  self.table_name = "guru" # Assuming heidisql manual table is named 'guru' in singular like 'siswa'
   self.primary_key = "guru_id"
-  self.table_name = "guru"
-  self.record_timestamps = false
+  has_one :user, foreign_key: "guru_id"
+  belongs_to :lembaga, foreign_key: "lembaga_id", optional: true
+
+  def nama_sekolah
+    lembaga&.nama_lembaga
+  end
+
+  def nama_sekolah=(val)
+    self.lembaga = Lembaga.find_or_create_by(nama_lembaga: val) if val.present?
+  end
 
   before_create :generate_id
 
-  has_many :siswas, foreign_key: "guru_id", class_name: "Siswa"
-  has_many :nilai_siswas, foreign_key: "guru_id", class_name: "NilaiSiswa"
-  has_one :user, foreign_key: "guru_id", class_name: "User"
-
   private
+
   def generate_id
-    self.guru_id = SecureRandom.uuid
+    self.guru_id = SecureRandom.uuid unless self.guru_id.present?
   end
 end

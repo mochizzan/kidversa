@@ -42,7 +42,7 @@
       <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 25px; height: 25px;">
         <i class="bi bi-person-badge small"></i>
       </div>
-      <span><%= data.guru.nama %></span>
+      <span><%= data.guru&.nama %></span>
     </div>
   </td>
 
@@ -58,9 +58,9 @@
          data-id="<%= data.siswa_id %>" 
          data-nisn="<%= data.nisn %>"
          data-nama="<%= data.nama %>"
-         data-guru="<%= data.guru.nama %>"
+         data-guru="<%= data.guru&.nama %>"
          data-alamat="<%= data.alamat %>"
-         data-nama-lembaga="<%= data.nama_lembaga %>"
+         data-nama-lembaga="<%= data.lembaga&.nama_lembaga %>"
          
          data-tgl-lahir="<%= data.tanggal_lahir %>"
          data-usia="<%= data.usia %>"

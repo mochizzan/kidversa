@@ -8,6 +8,7 @@ class Siswa < ApplicationRecord
 
   belongs_to :guru, foreign_key: "guru_id", class_name: "Guru", optional: true
   belongs_to :orang_tua, foreign_key: "orang_tua_id", class_name: "OrangTua", optional: true
+  belongs_to :lembaga, foreign_key: "lembaga_id", class_name: "Lembaga", optional: true
   belongs_to :tahun_ajaran, foreign_key: "tahun_ajaran_id", class_name: "TahunAjaran"
 
   has_many :nilai_siswas, foreign_key: "siswa_id", class_name: "NilaiSiswa", dependent: :destroy

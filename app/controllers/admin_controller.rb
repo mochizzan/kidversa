@@ -54,8 +54,8 @@ class AdminController < ApplicationController
     @siswas = scope.order(nama: :asc).page(params[:page]).per(25)
 
     ids_siswa_aktif = Riwayat.where(tahun_ajaran_id: @ta_aktif_obj.id).pluck(:siswa_id)
-
     @siswa_lama = Siswa.where.not(siswa_id: ids_siswa_aktif).order(nama: :asc)
+    @lembagas = Lembaga.select(:nama_lembaga).where.not(nama_lembaga: [nil, '']).distinct
   end
 
   def tambah_data_siswa
@@ -86,13 +86,15 @@ class AdminController < ApplicationController
       pekerjaan_ibu: data_siswa[:pekerjaan_ibu]
     )
 
+    lembaga = Lembaga.find_or_create_by!(nama_lembaga: data_siswa[:nama_lembaga])
+
     @siswa = Siswa.new(
       nisn: data_siswa[:nisn],
       nama: data_siswa[:nama],
       tanggal_lahir: data_siswa[:tanggal_lahir],
       usia: data_siswa[:usia],
       kelompok_usia: data_siswa[:kelompok_usia],
-      nama_lembaga: data_siswa[:nama_lembaga],
+      lembaga_id: lembaga.lembaga_id,
       alamat: data_siswa[:alamat],
       guru_id: guru_id,
       profile_path: profile_path,
@@ -139,13 +141,15 @@ class AdminController < ApplicationController
     end
 
     if data_siswa
+      lembaga = Lembaga.find_or_create_by!(nama_lembaga: params[:nama_lembaga])
+
       data_siswa.update(
         nisn: params[:nisn],
         nama: params[:nama],
         tanggal_lahir: params[:tanggal_lahir],
         usia: params[:usia],
         kelompok_usia: params[:kelompok_usia],
-        lembaga: params[:nama_lembaga],
+        lembaga_id: lembaga.lembaga_id,
         alamat: params[:alamat],
         profile_path: profile_path
         )
@@ -188,7 +192,10 @@ class AdminController < ApplicationController
 
           update_params = {}
           update_params[:kelompok_usia] = target_kelompok if target_kelompok.present?
-          update_params[:lembaga] = nama_lembaga if nama_lembaga.present?
+          if nama_lembaga.present?
+            lembaga = Lembaga.find_or_create_by!(nama_lembaga: nama_lembaga)
+            update_params[:lembaga_id] = lembaga.lembaga_id
+          end
           update_params[:tahun_ajaran_id] = ta_aktif[:id]
 
           siswa.update(update_params) if update_params.any?
@@ -279,6 +286,8 @@ class AdminController < ApplicationController
       scope = scope.where("nisn LIKE ? OR nama LIKE ?", keyword, keyword)
     end
     @data_siswa = scope.page(params[:page]).per(25)
+    @total_pertanyaan = Pertanyaan.all.count
+    @nilai_siswa = NilaiSiswa.all
   end
 
   def simpan_catatan

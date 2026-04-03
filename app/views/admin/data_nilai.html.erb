@@ -54,16 +54,13 @@
             <% if @data_siswa.present? %>
               <%
               @data_siswa.each_with_index do |data, i|
-              puts data.inspect
-
-              status_penilaian = data.status_penilaians
-              if status_penilaian.present?
-                complete = true
-              else
-                complete = false
-              end
+              total_terjawab = @nilai_siswa.where(siswa_id: data.siswa_id).count
+              persen = (total_terjawab.to_f / @total_pertanyaan) * 100
+              puts "TOTAL PERTANYAAN: #{@total_pertanyaan}"
+              puts "TOTAL TERJAWAB: #{total_terjawab}"
+              puts "PERSEN: #{persen.to_i}"
               %>
-                <%= render 'shared/list_data_penilaian', {data: data, i: i, complete: complete} %>
+                <%= render 'shared/list_data_penilaian', {data: data, i: i, persen: persen.to_i} %>
               <% end %>
             <% else %>
               <tr>

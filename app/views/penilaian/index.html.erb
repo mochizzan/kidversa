@@ -92,8 +92,8 @@
             <% end %> 
             <% else %>
             <div class="col-12 text-center py-5">
-                <div class="text-muted mb-3"><i class="bi bi-clipboard-x display-4"></i></div>
-                <p class="text-muted fw-medium">Belum ada data pertanyaan yang tersedia.</p>
+              <div class="text-muted mb-3"><i class="bi bi-clipboard-x display-4"></i></div>
+              <p class="text-muted fw-medium">Belum ada data pertanyaan yang tersedia.</p>
             </div>
             <% end %> 
         </div>
@@ -116,6 +116,36 @@
   </div>
 </div>
 
+
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Catatan Otomatis</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modal-body-ai">
+        <% if @current_catatan.blank? %>
+          <div class="text-center py-4">
+            <div class="spinner-grow text-primary mb-3" role="status">
+              <span class="visually-hidden">Membuat Catatan Otomatis...</span>
+            </div>
+            <p class="text-muted fw-medium mb-0">AI sedang merangkai catatan perkembangan siswa...</p>
+          </div>
+        <% else %>
+        <%= @current_catatan %>
+        <% end %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= form_with url: "/admin/penilaian/generate_catatan?siswa_id=#{@data_siswa.siswa_id}", method: :post, id: "form-trigger" do |f| %>
+<%end%>
+
 <script>
   document.addEventListener('turbo:load', function () {
       updateProgress();
@@ -127,7 +157,23 @@
               updateCardStatus(this);
           });
       });
-  });
+
+      const modalLoadingAi = document.getElementById("staticBackdrop");
+      const params = new URLSearchParams(window.location.search);
+      
+      if (params.get("is_complete") === "true" ) {
+        const _modalLoadingAi = new bootstrap.Modal(modalLoadingAi);
+        _modalLoadingAi.show();
+
+         const current_catatan = <%= @current_catatan.blank? ? "true" : "false" %>;
+      if (current_catatan) {
+        document.getElementById("form-trigger").requestSubmit();
+      }
+      }
+
+     
+    });
+  
 
   function updateCardStatus(inputElement) {
       const card = inputElement.closest('.assessment-card');

@@ -80,7 +80,12 @@
 
           <div class="col-12 col-md-6">
             <label for="inputLembaga" class="form-label fw-bold text-secondary small text-uppercase">Nama Lembaga</label>
-            <%= f.text_field :nama_lembaga, class: "form-control form-control-lg bg-light", id: "inputLembaga", placeholder: "Contoh: PAUD Melati", required: true %>
+            <%= f.text_field :nama_lembaga, list: "listLembagaTambah", class: "form-control form-control-lg bg-light", id: "inputLembaga", placeholder: "Mulai ketik atau pilih sekolah...", required: true, autocomplete: "off" %>
+            <datalist id="listLembagaTambah">
+              <% @lembagas&.each do |lembaga| %>
+                <option value="<%= lembaga.nama_lembaga %>"></option>
+              <% end %>
+            </datalist>
           </div>
 
           <div class="col-12">
