@@ -101,7 +101,7 @@ class PenilaianController < AdminController
       response.headers["X-Accel-Buffering"] = "no"
       response.headers["Cache-Control"] = "no-cache"
       response.headers["Content-Encoding"] = "identity"
-      
+
       sse = SSE.new(response.stream, event: "message")
 
       full_message = ""
@@ -138,7 +138,9 @@ class PenilaianController < AdminController
                 if payload.is_a?(Hash)
                   if is_thinking_chunk && payload[:thinking].present?
                     val = payload[:thinking]
-                    text_to_send = val.is_a?(Array) ? val.map { |v| v.is_a?(Hash) ? v[:text] : v.to_s }.join : val.to_s
+                    text_to_send = val.is_a?(Array) ? val.map { |v| 
+                      v.is_a?(Hash) ? (v[:text] || v[:content] || v[:delta] || v.values.find { |x| x.is_a?(String) }) : v.to_s 
+                    }.join : val.to_s
                   elsif payload[:text].present?
                     text_to_send = payload[:text]
                   elsif payload[:content].present?
@@ -162,11 +164,11 @@ class PenilaianController < AdminController
                      full_message += text_to_send
                      sse.write({ type: "text", content: text_to_send })
                   end
-                  
-                  # Gunakan ID timestamp unik agar Cloudflare GZIP tidak bisa meng-compress secara extrim
-                  # dan menyebabkan Nginx stack di buffer
-                  bypasser = "kidversa_" + (1..150).map { rand(10...99).to_s }.join("_") + "_" + Time.now.to_f.to_s
-                  response.stream.write("data: {\"type\":\"ping\", \"bypasser\":\"#{bypasser}\"}\n\n")
+
+                  # Gunakan teks Bahasa Inggris natural agar NGINX buffer (4KB) cepat penuh
+                  # Namun WAF Cloudflare TIDAK menendang koneksi karena dikira malware (karena bahasanya wajar)
+                  safe_padding_english = "Generating AI assessment response correctly. Keeping connection stream alive and active right now. " * 45
+                  response.stream.write("data: {\"type\":\"ping\", \"pad\":\"#{safe_padding_english}\"}\n\n")
                 end
               rescue StandardError => e
                 puts "[RUBY PARSE ERR] #{e.message} on #{clean_json[0..100]}..."
@@ -174,7 +176,7 @@ class PenilaianController < AdminController
             end # end if data:
           end # end while
         end # end AiController.index
-        
+
         # Save the final result
         Siswa.find_by(siswa_id: siswa_id).update(catatan: full_message) if full_message.present?
       ensure
