@@ -108,7 +108,7 @@ class PenilaianController < AdminController
       full_message = ""
       full_thinking_message = ""
       buffer = ""
-      
+
       begin
         AiController.index(siswa_id) do |chunk|
           buffer += chunk
@@ -126,7 +126,7 @@ class PenilaianController < AdminController
               begin
                 data = JSON.parse(clean_json, symbolize_names: true)
 
-                payload = data[:choices]&.first&.dig(:delta) || data[:delta] || data[:message] || data[:content] || data
+                payload = data[:choices]&.first&.dig(:delta) || data[:delta] || data[:message] || data[:content]
 
                 def extract_all_strings(obj)
                    case obj
@@ -143,19 +143,21 @@ class PenilaianController < AdminController
 
                 # Normalisasi semua kemungkinan content list
                 content_list = []
-                if payload.is_a?(Hash) && payload[:content].is_a?(Array)
-                   content_list = payload[:content]
-                elsif payload.is_a?(Array)
-                   content_list = payload
-                else
-                   content_list = [payload]
+                if payload.present?
+                  if payload.is_a?(Hash) && payload[:content].is_a?(Array)
+                     content_list = payload[:content]
+                  elsif payload.is_a?(Array)
+                     content_list = payload
+                  else
+                     content_list = [ payload ]
+                  end
                 end
 
                 puts "[MISTRAL RAW] #{clean_json[0..300]}"
 
                 content_list.each do |item|
                    next if item.nil?
-                   
+
                    text_chunk = ""
                    is_thinking = false
 
