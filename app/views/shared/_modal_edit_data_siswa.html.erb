@@ -23,12 +23,12 @@
             
             <div class="col-12 col-md-6">
               <label for="editNISN" class="form-label fw-bold text-secondary small text-uppercase">NISN / NIS</label>
-              <%= number_field_tag :nisn, nil, id: "editNISN", class: "form-control form-control-lg bg-light", placeholder: "12345678", required: true %>
+              <%= number_field_tag :nisn, nil, id: "editNISN", class: "form-control form-control-lg bg-light", placeholder: "12345678", required: true, onchange: "this.value = this.value.trim()" %>
             </div>
 
             <div class="col-12 col-md-6">
               <label for="editNama" class="form-label fw-bold text-secondary small text-uppercase">Nama Lengkap</label>
-              <%= text_field_tag :nama, nil, id: "editNama", class: "form-control form-control-lg bg-light", placeholder: "Nama Anak", required: true %>
+              <%= text_field_tag :nama, nil, id: "editNama", class: "form-control form-control-lg bg-light", placeholder: "Nama Anak", required: true, onchange: "this.value = this.value.trim()" %>
             </div>
 
             <div class="col-12 col-md-5">
@@ -56,12 +56,12 @@
 
             <div class="col-12">
               <label for="editGuru" class="form-label fw-bold text-secondary small text-uppercase">Nama Guru / Wali Kelas</label>
-              <%= text_field_tag :nama_guru, nil, id: "editGuru", class: "form-control form-control-lg bg-light" %>
+              <%= text_field_tag :nama_guru, nil, id: "editGuru", class: "form-control form-control-lg bg-light", onchange: "this.value = this.value.trim()" %>
             </div>
 
             <div class="col-12 col-md-6">
               <label for="editLembaga" class="form-label fw-bold text-secondary small text-uppercase">Nama Lembaga</label>
-              <%= text_field_tag :nama_lembaga, nil, list: "listLembagaEdit", id: "editLembaga", class: "form-control form-control-lg bg-light", placeholder: "Mulai ketik atau pilih sekolah...", required: true, autocomplete: "off" %>
+              <%= text_field_tag :nama_lembaga, nil, list: "listLembagaEdit", id: "editLembaga", class: "form-control form-control-lg bg-light", placeholder: "Mulai ketik atau pilih sekolah...", required: true, autocomplete: "off", onchange: "this.value = this.value.trim()" %>
               <datalist id="listLembagaEdit">
                 <% @lembagas&.each do |lembaga| %>
                   <option value="<%= lembaga.nama_lembaga %>"></option>
@@ -71,7 +71,7 @@
 
             <div class="col-12">
               <label for="editAlamat" class="form-label fw-bold text-secondary small text-uppercase">Alamat Lengkap</label>
-              <%= text_area_tag :alamat, nil, id: "editAlamat", class: "form-control bg-light", rows: 2, required: true %>
+              <%= text_area_tag :alamat, nil, id: "editAlamat", class: "form-control bg-light", rows: 2, required: true, onchange: "this.value = this.value.trim()" %>
             </div>
 
             <div class="col-12 mt-4">
@@ -82,22 +82,22 @@
 
             <div class="col-12 col-md-6">
               <label for="editNamaAyah" class="form-label fw-bold text-secondary small text-uppercase">Nama Ayah</label>
-              <%= text_field_tag :nama_ayah, nil, id: "editNamaAyah", class: "form-control form-control-lg bg-light", required: true %>
+              <%= text_field_tag :nama_ayah, nil, id: "editNamaAyah", class: "form-control form-control-lg bg-light", required: true, onchange: "this.value = this.value.trim()" %>
             </div>
 
             <div class="col-12 col-md-6">
               <label for="editPekerjaanAyah" class="form-label fw-bold text-secondary small text-uppercase">Pekerjaan Ayah</label>
-              <%= text_field_tag :pekerjaan_ayah, nil, id: "editPekerjaanAyah", class: "form-control form-control-lg bg-light" %>
+              <%= text_field_tag :pekerjaan_ayah, nil, id: "editPekerjaanAyah", class: "form-control form-control-lg bg-light", onchange: "this.value = this.value.trim()" %>
             </div>
 
             <div class="col-12 col-md-6">
               <label for="editNamaIbu" class="form-label fw-bold text-secondary small text-uppercase">Nama Ibu</label>
-              <%= text_field_tag :nama_ibu, nil, id: "editNamaIbu", class: "form-control form-control-lg bg-light", required: true %>
+              <%= text_field_tag :nama_ibu, nil, id: "editNamaIbu", class: "form-control form-control-lg bg-light", required: true, onchange: "this.value = this.value.trim()" %>
             </div>
 
             <div class="col-12 col-md-6">
               <label for="editPekerjaanIbu" class="form-label fw-bold text-secondary small text-uppercase">Pekerjaan Ibu</label>
-              <%= text_field_tag :pekerjaan_ibu, nil, id: "editPekerjaanIbu", class: "form-control form-control-lg bg-light" %>
+              <%= text_field_tag :pekerjaan_ibu, nil, id: "editPekerjaanIbu", class: "form-control form-control-lg bg-light", onchange: "this.value = this.value.trim()" %>
             </div>
 
             <div class="col-12 mt-4">

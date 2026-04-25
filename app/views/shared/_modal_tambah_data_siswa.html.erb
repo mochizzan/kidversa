@@ -37,7 +37,8 @@
                 class: "form-control form-control-lg bg-light", 
                 id: "inputNama", 
                 placeholder: "Nama sesuai Akta", 
-                required: true %>
+                required: true,
+                onchange: "this.value = this.value.trim()" %>
           </div>
 
           <div class="col-12 col-md-5">
@@ -75,12 +76,13 @@
             <%= f.text_field :nama_guru, 
                 class: "form-control form-control-lg bg-light", 
                 id: "inputGuru", 
-                value: @nama_guru %> 
+                value: @nama_guru,
+                onchange: "this.value = this.value.trim()" %>
           </div>
 
           <div class="col-12 col-md-6">
             <label for="inputLembaga" class="form-label fw-bold text-secondary small text-uppercase">Nama Lembaga</label>
-            <%= f.text_field :nama_lembaga, list: "listLembagaTambah", class: "form-control form-control-lg bg-light", id: "inputLembaga", placeholder: "Mulai ketik atau pilih sekolah...", required: true, autocomplete: "off" %>
+            <%= f.text_field :nama_lembaga, list: "listLembagaTambah", class: "form-control form-control-lg bg-light", id: "inputLembaga", placeholder: "Mulai ketik atau pilih sekolah...", required: true, autocomplete: "off", onchange: "this.value = this.value.trim()" %>
             <datalist id="listLembagaTambah">
               <% @lembagas&.each do |lembaga| %>
                 <option value="<%= lembaga.nama_lembaga %>"></option>
@@ -90,7 +92,7 @@
 
           <div class="col-12">
             <label for="inputAlamat" class="form-label fw-bold text-secondary small text-uppercase">Alamat Lengkap</label>
-            <%= f.text_area :alamat, class: "form-control bg-light", id: "inputAlamat", rows: 2, placeholder: "Alamat domisili anak...", required: true %>
+            <%= f.text_area :alamat, class: "form-control bg-light", id: "inputAlamat", rows: 2, placeholder: "Alamat domisili anak...", required: true, onchange: "this.value = this.value.trim()" %>
           </div>
 
           
@@ -107,7 +109,8 @@
                 class: "form-control form-control-lg bg-light", 
                 id: "inputNamaAyah", 
                 placeholder: "Nama Ayah Kandung", 
-                required: true %>
+                required: true,
+                onchange: "this.value = this.value.trim()" %>
           </div>
 
           <div class="col-12 col-md-6">
@@ -115,7 +118,8 @@
             <%= f.text_field :pekerjaan_ayah, 
                 class: "form-control form-control-lg bg-light", 
                 id: "inputPekerjaanAyah", 
-                placeholder: "Contoh: Wiraswasta" %>
+                placeholder: "Contoh: Wiraswasta",
+                onchange: "this.value = this.value.trim()" %>
           </div>
 
           <div class="col-12 col-md-6">
@@ -124,7 +128,8 @@
                 class: "form-control form-control-lg bg-light", 
                 id: "inputNamaIbu", 
                 placeholder: "Nama Ibu Kandung", 
-                required: true %>
+                required: true,
+                onchange: "this.value = this.value.trim()" %>
           </div>
 
           <div class="col-12 col-md-6">
@@ -132,7 +137,8 @@
             <%= f.text_field :pekerjaan_ibu, 
                 class: "form-control form-control-lg bg-light", 
                 id: "inputPekerjaanIbu", 
-                placeholder: "Contoh: Ibu Rumah Tangga" %>
+                placeholder: "Contoh: Ibu Rumah Tangga",
+                onchange: "this.value = this.value.trim()" %>
           </div>
           <div class="col-12 mt-4">
             <div class="alert alert-light border border-dashed d-flex align-items-center mb-0" role="alert">
