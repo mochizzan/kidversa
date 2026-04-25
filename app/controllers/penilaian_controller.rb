@@ -110,54 +110,61 @@ class PenilaianController < AdminController
         AiController.index(siswa_id) do |chunk|
           buffer += chunk
           while (newline_index = buffer.index("\n"))
-            line = buffer.slice!(0..newline_index).strip
-            next if line.blank?
-            next unless line.start_with?("data: ")
-            next if line == "data: [DONE]"
-            
-            clean_line = line.sub(/^data: /, "").strip
-            begin
-              data = JSON.parse(clean_line, symbolize_names: true)
-              # puts "AI DEBUG DATA: #{data.inspect}" # Aktifkan info ini jika butuh info lebih lanjut
+            line = buffer.slice!(0..newline_index)
+            trimmed_line = line.strip
 
-              # Try to find content in different possible locations
-              content_raw = data.dig(:outputs, 0, :content) || data[:content] || data
-              content_list = content_raw.is_a?(Array) ? content_raw : [ content_raw ]
+            next if trimmed_line.blank?
 
-              content_list.each do |item|
-                if item.is_a?(Hash)
-                  type = item[:type] || item[:object]
+            if trimmed_line.start_with?("data:")
+              next if trimmed_line.include?("[DONE]")
 
-                  if type == "thinking"
-                    thinking_val = item[:thinking] || item[:content]
-                    text = thinking_val.is_a?(Array) ? thinking_val.map { |t| t[:text] }.join : thinking_val
-                    sse.write({ type: "thinking", content: text }) if text.present?
-                  elsif [ "text", "answer", "message", "message.output.delta" ].include?(type) || item[:content].present?
-                    # Check nested content if present
-                    nested_content = item[:content]
-                    if nested_content.is_a?(Hash) && nested_content[:type] == "thinking"
-                      thinking_val = nested_content[:thinking]
-                      text = thinking_val.is_a?(Array) ? thinking_val.map { |t| (t.is_a?(Hash) ? t[:text] : t) }.join : thinking_val
+              # Ekstrak JSON (menangani format 'data: ' atau 'data:')
+              clean_json = trimmed_line.sub(/^data:\s?/, "").strip
+
+              begin
+                data = JSON.parse(clean_json, symbolize_names: true)
+                puts "AI PROCESSING: #{data[:type]}" # Log singkat di terminal
+                STDOUT.flush
+
+                # Try to find content in different possible locations
+                content_raw = data.dig(:outputs, 0, :content) || data[:content] || data
+                content_list = content_raw.is_a?(Array) ? content_raw : [ content_raw ]
+
+                content_list.each do |item|
+                  if item.is_a?(Hash)
+                    type = item[:type] || item[:object]
+
+                    if type == "thinking"
+                      thinking_val = item[:thinking] || item[:content]
+                      text = thinking_val.is_a?(Array) ? thinking_val.map { |t| t[:text] }.join : thinking_val
                       sse.write({ type: "thinking", content: text }) if text.present?
-                    else
-                      text = item[:text] || (nested_content.is_a?(String) ? nested_content : nil) || nested_content&.dig(:text)
-                      if text.present?
-                        full_message += text
-                        sse.write({ type: "text", content: text })
+                    elsif [ "text", "answer", "message", "message.output.delta" ].include?(type) || item[:content].present?
+                      # Check nested content if present
+                      nested_content = item[:content]
+                      if nested_content.is_a?(Hash) && nested_content[:type] == "thinking"
+                        thinking_val = nested_content[:thinking]
+                        text = thinking_val.is_a?(Array) ? thinking_val.map { |t| (t.is_a?(Hash) ? t[:text] : t) }.join : thinking_val
+                        sse.write({ type: "thinking", content: text }) if text.present?
+                      else
+                        text = item[:text] || (nested_content.is_a?(String) ? nested_content : nil) || nested_content&.dig(:text)
+                        if text.present?
+                          full_message += text
+                          sse.write({ type: "text", content: text })
+                        end
                       end
                     end
+                  elsif item.is_a?(String)
+                    # Direct string content
+                    full_message += item
+                    sse.write({ type: "text", content: item })
                   end
-                elsif item.is_a?(String)
-                  # Direct string content
-                  full_message += item
-                  sse.write({ type: "text", content: item })
                 end
+              rescue JSON::ParserError => e
+                puts "Partial or invalid JSON skipped in chunk: #{e.message}"
               end
-            rescue JSON::ParserError => e
-              puts "Partial or invalid JSON skipped in chunk: #{e.message}"
-            end
-          end
-        end
+            end # end if data:
+          end # end while
+        end # end AiController.index
         # Save the final result
         Siswa.find_by(siswa_id: siswa_id).update(catatan: full_message) if full_message.present?
       ensure
