@@ -232,12 +232,14 @@
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
+        console.log("[AI Stream] Received chunk length:", value.length);
         const lines = buffer.split("\n");
         buffer = lines.pop(); // Simpan bagian baris yang belum lengkap ke buffer
 
         for (const line of lines) {
           const trimmedLine = line.trim();
           if (trimmedLine.startsWith("data: ")) {
+            console.log("[AI Stream] Processing line:", trimmedLine);
             try {
               const data = JSON.parse(trimmedLine.substring(6));
               

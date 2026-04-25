@@ -100,6 +100,7 @@ class PenilaianController < AdminController
       response.headers["Last-Modified"] = Time.now.httpdate
       response.headers["X-Accel-Buffering"] = "no" # Disable Nginx buffering
       response.headers["Cache-Control"] = "no-cache"
+      response.headers["Content-Encoding"] = "identity" # Gerenti tidak dikompresi oleh Nginx
       sse = SSE.new(response.stream, event: "message")
 
       full_message = ""
