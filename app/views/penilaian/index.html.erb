@@ -187,7 +187,10 @@
 
          const current_catatan_blank = <%= @current_catatan.blank? ? "true" : "false" %>;
         if (current_catatan_blank) {
-          startAiStreaming();
+          if (!window.aiStreamingInitiated) {
+            window.aiStreamingInitiated = true;
+            startAiStreaming();
+          }
         }
       }
 
