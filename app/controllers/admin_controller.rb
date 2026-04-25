@@ -161,13 +161,17 @@ class AdminController < ApplicationController
   def hapus_data_siswa
     siswa_id = params[:siswa_id]
     data_siswa = Siswa.find_by(siswa_id: siswa_id)
-    orang_tua = OrangTua.find_by(orang_tua_id: data_siswa.orang_tua_id)
 
     if data_siswa
-      if orang_tua
-        orang_tua.delete
+      orang_tua_id = data_siswa.orang_tua_id
+      
+      # Siswa wajib di destroy lebih dulu karena orang_tua_id direferensikan oleh tabel Siswa
+      # Serta agar relasi nilai, riwayat, dan status penilaian ikut terhapus
+      data_siswa.destroy
+      
+      if orang_tua_id.present?
+         OrangTua.find_by(orang_tua_id: orang_tua_id)&.destroy
       end
-      data_siswa.delete
       redirect_to data_siswa_path, notice: "Data berhasil dihapus!"
     else
       redirect_to data_siswa_path, alert: "Data tidak ditemukan."
