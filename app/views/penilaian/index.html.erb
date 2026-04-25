@@ -261,18 +261,25 @@
                 thinkingContent.innerText = fullThinking;
                 thinkingScroll.scrollTop = thinkingScroll.scrollHeight;
               } else if (data.type === "text") {
-                // Sembunyikan loading, munculkan result
+                // Sembunyikan thinking, tampilkan result container
                 loadingContainer.classList.add("d-none");
                 resultContainer.classList.remove("d-none");
                 
                 fullResult += data.content;
-                resultText.innerText = fullResult;
+                
+                // Tambahkan kursor blink text-primary agar terlihat masih proses stream
+                resultText.innerHTML = fullResult + '<span class="spinner-grow spinner-grow-sm text-primary ms-1" role="status" style="width: 0.8rem; height: 0.8rem;"></span>';
               }
             } catch (e) {
               console.warn("[AI Stream] JSON Parse Error:", e, "on string:", jsonStr);
             }
           }
         }
+      }
+
+      // Hapus spinner dan bersihkan teks saat stream selesai
+      if (resultText && fullResult.length > 0) {
+         resultText.innerText = fullResult;
       }
 
       function trimmed_line_preview(str) {

@@ -153,19 +153,20 @@ class PenilaianController < AdminController
                   text_to_send = payload.map { |v| v.is_a?(Hash) ? (v[:text]||v[:content]) : v.to_s }.join
                 end
 
-                puts "[RUBY CHUNK] Thinking: #{is_thinking_chunk ? 'YES' : 'NO'} | Txt: #{text_to_send.inspect}"
-                STDOUT.flush
+                puts "[MISTRAL RAW] #{clean_json[0..300]}"
 
                 if text_to_send.present?
                   if is_thinking_chunk
-                     # Tambahkan byte acak yang tak bisa dikompres GZIP agar buffer Cloudflare/Nginx jebol
                      sse.write({ type: "thinking", content: text_to_send })
-                     response.stream.write(":#{SecureRandom.hex(2048)}\n\n")
                   else
                      full_message += text_to_send
                      sse.write({ type: "text", content: text_to_send })
-                     response.stream.write(":#{SecureRandom.hex(2048)}\n\n")
                   end
+                  
+                  # Gunakan ID timestamp unik agar Cloudflare GZIP tidak bisa meng-compress secara extrim
+                  # dan menyebabkan Nginx stack di buffer
+                  bypasser = "kidversa_" + (1..150).map { rand(10...99).to_s }.join("_") + "_" + Time.now.to_f.to_s
+                  response.stream.write("data: {\"type\":\"ping\", \"bypasser\":\"#{bypasser}\"}\n\n")
                 end
               rescue StandardError => e
                 puts "[RUBY PARSE ERR] #{e.message} on #{clean_json[0..100]}..."
@@ -173,6 +174,7 @@ class PenilaianController < AdminController
             end # end if data:
           end # end while
         end # end AiController.index
+        
         # Save the final result
         Siswa.find_by(siswa_id: siswa_id).update(catatan: full_message) if full_message.present?
       ensure
