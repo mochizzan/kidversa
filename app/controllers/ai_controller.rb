@@ -25,10 +25,10 @@ class AiController
     response = client.post do |req|
       req.body = messages_data.to_json
     end
-    
+
     response_data = JSON.parse(response.body, symbolize_names: true) rescue {}
     content = response_data.dig(:outputs, 0, :content) || response_data.dig(:choices, 0, :message, :content)
-    
+
     if content.is_a?(Array)
       # Cari tipe teks secara spesifik
       text_block = content.find { |c| c[:type] == "text" }

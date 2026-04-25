@@ -310,12 +310,15 @@ class AdminController < ApplicationController
 
   def upload_foto(file_io)
     if file_io.size < 3.megabyte
-      file_name = "profile_#{params[:data_siswa][:nisn]}"
+      nisn = params.dig(:data_siswa, :nisn) || params[:nisn]
+      extension = File.extname(file_io.original_filename)
+      file_name = "profile_#{nisn}#{extension}"
       file_path = Rails.root.join("public", "uploads")
       FileUtils.mkdir_p(file_path) unless File.exist?(file_path)
 
-      if File.exist?("#{file_path}/#{file_name}")
-        File.delete("#{file_path}/#{file_name}")
+      # Hapus file lama jika ada yang namanya mirip (karena ekstensi mungkin beda)
+      Dir.glob(File.join(file_path, "profile_#{nisn}.*")).each do |f|
+        File.delete(f)
       end
 
       File.open(File.join(file_path, file_name), "wb") do |file|
