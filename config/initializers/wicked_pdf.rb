@@ -14,8 +14,8 @@ WickedPdf.configure do |config|
   if Gem.win_platform?
     config.exe_path = "C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe"
   else
-    # Gunakan path sistem setelah menginstal wkhtmltopdf di Ubuntu (sudo apt install wkhtmltopdf)
-    config.exe_path = '/usr/bin/wkhtmltopdf'
+    # Mencari otomatis path wkhtmltopdf di sistem linux (Ubuntu)
+    config.exe_path = `which wkhtmltopdf`.strip
   end
   #   or
   # config.exe_path = Gem.bin_path("wkhtmltopdf-binary", "wkhtmltopdf")
