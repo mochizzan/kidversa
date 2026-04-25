@@ -101,8 +101,8 @@ class PenilaianController < AdminController
       response.headers["X-Accel-Buffering"] = "no"
       response.headers["Cache-Control"] = "no-cache"
       response.headers["Content-Encoding"] = "identity"
-      response.stream.write ":" + (" " * 2048) + "\n"
-      sse = SSE.new(response.stream, event: "message")
+      # Trik Proxy: Kirim 10KB data kosong agar Nginx/Cloudflare langsung mem-bypass buffer mereka
+      response.stream.write ":" + (" " * 10240) + "\n"
 
       full_message = ""
       buffer = ""
@@ -137,26 +137,30 @@ class PenilaianController < AdminController
                     if type == "thinking"
                       thinking_val = item[:thinking] || item[:content]
                       text = thinking_val.is_a?(Array) ? thinking_val.map { |t| t[:text] }.join : thinking_val
-                      sse.write({ type: "thinking", content: text }) if text.present?
+                      if text.present?
+                        response.stream.write "data: " + { type: "thinking", content: text }.to_json + "\n\n"
+                      end
                     elsif [ "text", "answer", "message", "message.output.delta" ].include?(type) || item[:content].present?
                       # Check nested content if present
                       nested_content = item[:content]
                       if nested_content.is_a?(Hash) && nested_content[:type] == "thinking"
                         thinking_val = nested_content[:thinking]
                         text = thinking_val.is_a?(Array) ? thinking_val.map { |t| (t.is_a?(Hash) ? t[:text] : t) }.join : thinking_val
-                        sse.write({ type: "thinking", content: text }) if text.present?
+                        if text.present?
+                          response.stream.write "data: " + { type: "thinking", content: text }.to_json + "\n\n"
+                        end
                       else
                         text = item[:text] || (nested_content.is_a?(String) ? nested_content : nil) || nested_content&.dig(:text)
                         if text.present?
                           full_message += text
-                          sse.write({ type: "text", content: text })
+                          response.stream.write "data: " + { type: "text", content: text }.to_json + "\n\n"
                         end
                       end
                     end
                   elsif item.is_a?(String)
                     # Direct string content
                     full_message += item
-                    sse.write({ type: "text", content: item })
+                    response.stream.write "data: " + { type: "text", content: item }.to_json + "\n\n"
                   end
                 end
               rescue JSON::ParserError => e
@@ -168,7 +172,7 @@ class PenilaianController < AdminController
         # Save the final result
         Siswa.find_by(siswa_id: siswa_id).update(catatan: full_message) if full_message.present?
       ensure
-        sse.close
+        response.stream.close
       end
     else
       if current_catatan.blank?
