@@ -109,24 +109,16 @@ class PenilaianController < AdminController
       begin
         AiController.index(siswa_id) do |chunk|
           buffer += chunk
-          # Penanganan baris yang lebih robust untuk streaming
-          lines = buffer.split("\n")
-          if buffer.end_with?("\n")
-            buffer = ""
-          else
-            buffer = lines.pop || ""
-          end
-
-          lines.each do |line|
-            line = line.strip
+          while (newline_index = buffer.index("\n"))
+            line = buffer.slice!(0..newline_index).strip
             next if line.blank?
             next unless line.start_with?("data: ")
             next if line == "data: [DONE]"
-
+            
             clean_line = line.sub(/^data: /, "").strip
             begin
               data = JSON.parse(clean_line, symbolize_names: true)
-              puts "AI DEBUG DATA: #{data.inspect}"
+              # puts "AI DEBUG DATA: #{data.inspect}" # Aktifkan info ini jika butuh info lebih lanjut
 
               # Try to find content in different possible locations
               content_raw = data.dig(:outputs, 0, :content) || data[:content] || data
