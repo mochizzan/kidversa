@@ -102,10 +102,13 @@ class PenilaianController < AdminController
       response.headers["Cache-Control"] = "no-cache"
       response.headers["Content-Encoding"] = "identity"
 
+      # Setup SSE
       sse = SSE.new(response.stream, event: "message")
 
       full_message = ""
+      full_thinking_message = ""
       buffer = ""
+      
       begin
         AiController.index(siswa_id) do |chunk|
           buffer += chunk
@@ -123,53 +126,71 @@ class PenilaianController < AdminController
               begin
                 data = JSON.parse(clean_json, symbolize_names: true)
 
-                is_thinking_chunk = false
-                text_to_send = ""
-
-                # Identifikasi otomatis logika thinking
-                raw_str = data.to_s
-                if raw_str.include?(":thinking") && !raw_str.include?(":thinking=>[]") && !raw_str.include?(":thinking=>\"\"")
-                  is_thinking_chunk = true
-                end
-
-                # Ambil Teks output
                 payload = data[:choices]&.first&.dig(:delta) || data[:delta] || data[:message] || data[:content] || data
 
-                if payload.is_a?(Hash)
-                  if is_thinking_chunk && payload[:thinking].present?
-                    val = payload[:thinking]
-                    text_to_send = val.is_a?(Array) ? val.map { |v| 
-                      v.is_a?(Hash) ? (v[:text] || v[:content] || v[:delta] || v.values.find { |x| x.is_a?(String) }) : v.to_s 
-                    }.join : val.to_s
-                  elsif payload[:text].present?
-                    text_to_send = payload[:text]
-                  elsif payload[:content].present?
-                    val = payload[:content]
-                    text_to_send = val.is_a?(Array) ? val.map { |v| v.is_a?(Hash) ? (v[:text]||v[:content]) : v.to_s }.join : val.to_s
-                  elsif data[:outputs].is_a?(Array)
-                    text_to_send = data[:outputs].map { |o| o[:text] || o[:content] }.compact.join
-                  end
-                elsif payload.is_a?(String)
-                  text_to_send = payload
+                def extract_all_strings(obj)
+                   case obj
+                   when Hash
+                     obj.reject { |k, _| k == :type || k == "type" }.values.map { |v| extract_all_strings(v) }.join("")
+                   when Array
+                     obj.map { |v| extract_all_strings(v) }.join("")
+                   when String
+                     obj
+                   else
+                     ""
+                   end
+                end
+
+                # Normalisasi semua kemungkinan content list
+                content_list = []
+                if payload.is_a?(Hash) && payload[:content].is_a?(Array)
+                   content_list = payload[:content]
                 elsif payload.is_a?(Array)
-                  text_to_send = payload.map { |v| v.is_a?(Hash) ? (v[:text]||v[:content]) : v.to_s }.join
+                   content_list = payload
+                else
+                   content_list = [payload]
                 end
 
                 puts "[MISTRAL RAW] #{clean_json[0..300]}"
 
-                if text_to_send.present?
-                  if is_thinking_chunk
-                     sse.write({ type: "thinking", content: text_to_send })
-                  else
-                     full_message += text_to_send
-                     sse.write({ type: "text", content: text_to_send })
-                  end
+                content_list.each do |item|
+                   next if item.nil?
+                   
+                   text_chunk = ""
+                   is_thinking = false
 
-                  # Gunakan teks Bahasa Inggris natural agar NGINX buffer (4KB) cepat penuh
-                  # Namun WAF Cloudflare TIDAK menendang koneksi karena dikira malware (karena bahasanya wajar)
-                  safe_padding_english = "Generating AI assessment response correctly. Keeping connection stream alive and active right now. " * 45
-                  response.stream.write("data: {\"type\":\"ping\", \"pad\":\"#{safe_padding_english}\"}\n\n")
+                   if item.is_a?(Hash)
+                      # Jika terdapat atribut thinking (baik sebagai parent atau dari type="thinking")
+                      if item[:type] == "thinking" || item[:thinking].present?
+                         is_thinking = true
+                         val = item[:thinking] || item
+                         text_chunk = extract_all_strings(val)
+                      elsif item[:type] == "text" || item[:text].present? || item[:content].present?
+                         val = item[:text] || item[:content] || item
+                         text_chunk = extract_all_strings(val)
+                      else
+                         text_chunk = extract_all_strings(item)
+                      end
+                   else
+                      text_chunk = extract_all_strings(item)
+                   end
+
+                   # Khusus deteksi ganda, barangkali format lama bersarang
+                   is_thinking = true if item.to_s.include?(":thinking") && text_chunk.present? && !item.is_a?(String)
+
+                   if text_chunk.present?
+                     if is_thinking
+                        full_thinking_message += text_chunk
+                        sse.write({ type: "thinking", content: text_chunk })
+                     else
+                        full_message += text_chunk
+                        sse.write({ type: "text", content: text_chunk })
+                     end
+                   end
                 end
+
+                # Gunakan \n\n sebagai keep-alive sederhana
+                response.stream.write("\n\n")
               rescue StandardError => e
                 puts "[RUBY PARSE ERR] #{e.message} on #{clean_json[0..100]}..."
               end
@@ -178,7 +199,8 @@ class PenilaianController < AdminController
         end # end AiController.index
 
         # Save the final result
-        Siswa.find_by(siswa_id: siswa_id).update(catatan: full_message) if full_message.present?
+        final_save_text = full_message.present? ? full_message : full_thinking_message
+        Siswa.find_by(siswa_id: siswa_id)&.update(catatan: final_save_text) if final_save_text.present?
       ensure
         sse.close
       end
