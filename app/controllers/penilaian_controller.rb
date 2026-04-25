@@ -110,95 +110,23 @@ class PenilaianController < AdminController
       buffer = ""
 
       begin
-        AiController.index(siswa_id) do |chunk|
-          buffer += chunk
-          while (newline_index = buffer.index("\n"))
-            line = buffer.slice!(0..newline_index)
-            trimmed_line = line.strip
+        AiController.index(siswa_id) do |chunk_data|
+          # chunk_data dari mistral gem sudah berupa hash terurai: { type: "text" | "thinking", content: "..." }
+          next unless chunk_data.is_a?(Hash) && chunk_data[:content].present?
 
-            next if trimmed_line.blank?
+          text_chunk = chunk_data[:content]
+          
+          if chunk_data[:type] == "thinking"
+            full_thinking_message += text_chunk
+            sse.write({ type: "thinking", content: text_chunk })
+          else
+            full_message += text_chunk
+            sse.write({ type: "text", content: text_chunk })
+          end
 
-            if trimmed_line.start_with?("data:")
-              next if trimmed_line.include?("[DONE]")
-
-              clean_json = trimmed_line.sub(/^data:\s?/, "").strip
-
-              begin
-                data = JSON.parse(clean_json, symbolize_names: true)
-
-                payload = data[:choices]&.first&.dig(:delta) || data[:delta] || data[:message] || data[:content]
-
-                def extract_all_strings(obj)
-                   case obj
-                   when Hash
-                     obj.reject { |k, _| k == :type || k == "type" }.values.map { |v| extract_all_strings(v) }.join("")
-                   when Array
-                     obj.map { |v| extract_all_strings(v) }.join("")
-                   when String
-                     obj
-                   else
-                     ""
-                   end
-                end
-
-                # Normalisasi semua kemungkinan content list
-                content_list = []
-                if payload.present?
-                  if payload.is_a?(Hash) && payload[:content].is_a?(Array)
-                     content_list = payload[:content]
-                  elsif payload.is_a?(Array)
-                     content_list = payload
-                  else
-                     content_list = [ payload ]
-                  end
-                end
-
-                puts "[MISTRAL RAW] #{clean_json[0..300]}"
-
-                content_list.each do |item|
-                   next if item.nil?
-
-                   text_chunk = ""
-                   is_thinking = false
-
-                   if item.is_a?(Hash)
-                      # Jika terdapat atribut thinking (baik sebagai parent atau dari type="thinking")
-                      if item[:type] == "thinking" || item[:thinking].present?
-                         is_thinking = true
-                         val = item[:thinking] || item
-                         text_chunk = extract_all_strings(val)
-                      elsif item[:type] == "text" || item[:text].present? || item[:content].present?
-                         val = item[:text] || item[:content] || item
-                         text_chunk = extract_all_strings(val)
-                      else
-                         text_chunk = extract_all_strings(item)
-                      end
-                   else
-                      text_chunk = extract_all_strings(item)
-                   end
-
-                   # Khusus deteksi ganda, barangkali format lama bersarang
-                   is_thinking = true if item.to_s.include?(":thinking") && text_chunk.present? && !item.is_a?(String)
-
-                   if text_chunk.present?
-                     if is_thinking
-                        full_thinking_message += text_chunk
-                        sse.write({ type: "thinking", content: text_chunk })
-                     else
-                        full_message += text_chunk
-                        sse.write({ type: "text", content: text_chunk })
-                     end
-                   end
-                end
-
-                # Gunakan \n\n sebagai keep-alive sederhana
-                response.stream.write("\n\n")
-              rescue StandardError => e
-                puts "[RUBY PARSE ERR] #{e.message} on #{clean_json[0..100]}..."
-              end
-            end # end if data:
-          end # end while
-        end # end AiController.index
+          # Gunakan \n\n sebagai keep-alive sederhana
+          response.stream.write("\n\n")
+        end
 
         # Save the final result
         final_save_text = full_message.present? ? full_message : full_thinking_message
