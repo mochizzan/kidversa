@@ -98,9 +98,10 @@ class PenilaianController < AdminController
     if params[:stream] == "true" && current_catatan.blank?
       response.headers["Content-Type"] = "text/event-stream"
       response.headers["Last-Modified"] = Time.now.httpdate
-      response.headers["X-Accel-Buffering"] = "no" # Disable Nginx buffering
+      response.headers["X-Accel-Buffering"] = "no"
       response.headers["Cache-Control"] = "no-cache"
-      response.headers["Content-Encoding"] = "identity" # Gerenti tidak dikompresi oleh Nginx
+      response.headers["Content-Encoding"] = "identity"
+      response.stream.write ":" + (" " * 2048) + "\n"
       sse = SSE.new(response.stream, event: "message")
 
       full_message = ""
@@ -108,9 +109,17 @@ class PenilaianController < AdminController
       begin
         AiController.index(siswa_id) do |chunk|
           buffer += chunk
-          while (newline_index = buffer.index("\n"))
-            line = buffer.slice!(0..newline_index).strip
+          # Penanganan baris yang lebih robust untuk streaming
+          lines = buffer.split("\n")
+          if buffer.end_with?("\n")
+            buffer = ""
+          else
+            buffer = lines.pop || ""
+          end
 
+          lines.each do |line|
+            line = line.strip
+            next if line.blank?
             next unless line.start_with?("data: ")
             next if line == "data: [DONE]"
 
