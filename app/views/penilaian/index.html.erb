@@ -126,14 +126,34 @@
       </div>
       <div class="modal-body" id="modal-body-ai">
         <% if @current_catatan.blank? %>
-          <div class="text-center py-4">
-            <div class="spinner-grow text-primary mb-3" role="status">
-              <span class="visually-hidden">Membuat Catatan Otomatis...</span>
+          <div class="text-center py-4" id="ai-loading-container">
+            <div class="mb-4">
+              <div class="pulse-wrapper">
+                <div class="spinner-grow text-primary" role="status" style="width: 3rem; height: 3rem;">
+                  <span class="visually-hidden">Membuat Catatan Otomatis...</span>
+                </div>
+              </div>
             </div>
-            <p class="text-muted fw-medium mb-0">AI sedang merangkai catatan perkembangan siswa...</p>
+            <p class="text-muted fw-bold mb-3" id="ai-status-text">AI sedang merangkai catatan perkembangan siswa...</p>
+            
+            <div id="ai-thinking-wrapper" class="mt-4 transition-all d-none text-start">
+               <div class="d-flex align-items-center gap-2 mb-2 px-3">
+                  <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+                  <span class="text-secondary small fw-medium">AI Thinking Proses...</span>
+               </div>
+               <div id="ai-thinking-scroll" class="position-relative bg-light rounded-3 p-3 overflow-auto" style="max-height: 180px; font-size: 0.85rem;">
+                  <div class="thinking-fade-top"></div>
+                  <div id="ai-thinking-content" class="text-muted" style="white-space: pre-wrap; line-height: 1.6; font-style: italic;"></div>
+               </div>
+            </div>
+          </div>
+          <div id="ai-result-container" class="d-none">
+            <div id="ai-result-text" class="p-2" style="line-height: 1.7; font-size: 1.05rem; text-align: justify;"></div>
           </div>
         <% else %>
-        <%= @current_catatan %>
+          <div id="ai-result-text-static" class="p-2" style="line-height: 1.7; font-size: 1.05rem; text-align: justify;">
+            <%= @current_catatan %>
+          </div>
         <% end %>
       </div>
       <div class="modal-footer">
@@ -165,15 +185,86 @@
         const _modalLoadingAi = new bootstrap.Modal(modalLoadingAi);
         _modalLoadingAi.show();
 
-         const current_catatan = <%= @current_catatan.blank? ? "true" : "false" %>;
-      if (current_catatan) {
-        document.getElementById("form-trigger").requestSubmit();
-      }
+         const current_catatan_blank = <%= @current_catatan.blank? ? "true" : "false" %>;
+        if (current_catatan_blank) {
+          startAiStreaming();
+        }
       }
 
-     
+      // Cleanup backdrops when modal is closed
+      modalLoadingAi.addEventListener('hidden.bs.modal', function () {
+          document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+          document.body.classList.remove('modal-open');
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+      });
     });
-  
+
+  async function startAiStreaming() {
+    const siswaId = new URLSearchParams(window.location.search).get("siswa_id");
+    if (!siswaId) return;
+
+    const thinkingWrapper = document.getElementById("ai-thinking-wrapper");
+    const thinkingContent = document.getElementById("ai-thinking-content");
+    const thinkingScroll = document.getElementById("ai-thinking-scroll");
+    const resultContainer = document.getElementById("ai-result-container");
+    const resultText = document.getElementById("ai-result-text");
+    const loadingContainer = document.getElementById("ai-loading-container");
+    const statusText = document.getElementById("ai-status-text");
+
+    try {
+      const response = await fetch(`/admin/penilaian/generate_catatan?siswa_id=${siswaId}&stream=true`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          'Accept': 'text/event-stream'
+        }
+      });
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullThinking = "";
+      let fullResult = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.substring(6));
+              
+              if (data.type === "thinking") {
+                thinkingWrapper.classList.remove("d-none");
+                fullThinking += data.content;
+                thinkingContent.innerText = fullThinking;
+                thinkingScroll.scrollTop = thinkingScroll.scrollHeight;
+              } else if (data.type === "text") {
+                // Switching from loading/thinking to result
+                if (resultContainer.classList.contains("d-none")) {
+                   loadingContainer.classList.add("d-none");
+                   resultContainer.classList.remove("d-none");
+                }
+                fullResult += data.content;
+                resultText.innerText = fullResult;
+              }
+            } catch (e) {
+              console.error("Error parsing chunk", e);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Streaming error:", error);
+      statusText.innerText = "Terjadi kesalahan saat memproses data.";
+    }
+  }
+
+
 
   function updateCardStatus(inputElement) {
       const card = inputElement.closest('.assessment-card');
@@ -249,6 +340,46 @@
   }
 
   .transition-all {
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
+  }
+
+  .pulse-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      position: relative;
+      animation: pulse-glow 2s infinite;
+  }
+
+  @keyframes pulse-glow {
+      0% {
+          box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4), 0 0 0 0 rgba(13, 110, 253, 0.1);
+      }
+      70% {
+          box-shadow: 0 0 0 20px rgba(13, 110, 253, 0), 0 0 0 40px rgba(13, 110, 253, 0);
+      }
+      100% {
+          box-shadow: 0 0 0 0 rgba(13, 110, 253, 0), 0 0 0 0 rgba(13, 110, 253, 0);
+      }
+  }
+
+  .thinking-fade-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 30px;
+      background: linear-gradient(to bottom, #f8f9fa, transparent);
+      z-index: 2;
+      pointer-events: none;
+  }
+
+  #ai-thinking-scroll::-webkit-scrollbar {
+      width: 4px;
+  }
+  #ai-thinking-scroll::-webkit-scrollbar-thumb {
+      background: #dee2e6;
+      border-radius: 10px;
   }
 </style>
