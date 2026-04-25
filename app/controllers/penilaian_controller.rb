@@ -96,10 +96,12 @@ class PenilaianController < AdminController
     current_catatan = Siswa.where(siswa_id: siswa_id).pick(:catatan)
 
     if params[:stream] == "true" && current_catatan.blank?
-      response.headers['Content-Type'] = 'text/event-stream'
-      response.headers['Last-Modified'] = Time.now.httpdate
+      response.headers["Content-Type"] = "text/event-stream"
+      response.headers["Last-Modified"] = Time.now.httpdate
+      response.headers["X-Accel-Buffering"] = "no" # Disable Nginx buffering
+      response.headers["Cache-Control"] = "no-cache"
       sse = SSE.new(response.stream, event: "message")
-      
+
       full_message = ""
       buffer = ""
       begin
@@ -107,33 +109,33 @@ class PenilaianController < AdminController
           buffer += chunk
           while (newline_index = buffer.index("\n"))
             line = buffer.slice!(0..newline_index).strip
-            
+
             next unless line.start_with?("data: ")
             next if line == "data: [DONE]"
-            
+
             clean_line = line.sub(/^data: /, "").strip
             begin
               data = JSON.parse(clean_line, symbolize_names: true)
               puts "AI DEBUG DATA: #{data.inspect}"
-              
+
               # Try to find content in different possible locations
               content_raw = data.dig(:outputs, 0, :content) || data[:content] || data
-              content_list = content_raw.is_a?(Array) ? content_raw : [content_raw]
-              
+              content_list = content_raw.is_a?(Array) ? content_raw : [ content_raw ]
+
               content_list.each do |item|
                 if item.is_a?(Hash)
                   type = item[:type] || item[:object]
-                  
+
                   if type == "thinking"
                     thinking_val = item[:thinking] || item[:content]
-                    text = thinking_val.is_a?(Array) ? thinking_val.map{|t| t[:text]}.join : thinking_val
+                    text = thinking_val.is_a?(Array) ? thinking_val.map { |t| t[:text] }.join : thinking_val
                     sse.write({ type: "thinking", content: text }) if text.present?
-                  elsif ["text", "answer", "message", "message.output.delta"].include?(type) || item[:content].present?
+                  elsif [ "text", "answer", "message", "message.output.delta" ].include?(type) || item[:content].present?
                     # Check nested content if present
                     nested_content = item[:content]
                     if nested_content.is_a?(Hash) && nested_content[:type] == "thinking"
                       thinking_val = nested_content[:thinking]
-                      text = thinking_val.is_a?(Array) ? thinking_val.map{|t| (t.is_a?(Hash) ? t[:text] : t)}.join : thinking_val
+                      text = thinking_val.is_a?(Array) ? thinking_val.map { |t| (t.is_a?(Hash) ? t[:text] : t) }.join : thinking_val
                       sse.write({ type: "thinking", content: text }) if text.present?
                     else
                       text = item[:text] || (nested_content.is_a?(String) ? nested_content : nil) || nested_content&.dig(:text)
