@@ -231,17 +231,26 @@
         const { done, value } = await reader.read();
         if (done) break;
 
-        buffer += decoder.decode(value, { stream: true });
+        const decoded = decoder.decode(value, { stream: true });
         console.log("[AI Stream] Received chunk length:", value.length);
-        const lines = buffer.split("\n");
+        buffer += decoded;
+        
+        const lines = buffer.split(/\r?\n/);
         buffer = lines.pop(); // Simpan bagian baris yang belum lengkap ke buffer
 
         for (const line of lines) {
           const trimmedLine = line.trim();
-          if (trimmedLine.startsWith("data: ")) {
-            console.log("[AI Stream] Processing line:", trimmedLine);
+          if (!trimmedLine) continue;
+          
+          console.log("[AI Stream] Debug Raw Line:", trimmed_line_preview(trimmedLine));
+
+          // Gunakan regex agar lebih fleksibel terhadap spasi (data: atau data: )
+          const match = trimmedLine.match(/^data:\s*(.*)$/);
+          if (match) {
+            const jsonStr = match[1];
             try {
-              const data = JSON.parse(trimmedLine.substring(6));
+              const data = JSON.parse(jsonStr);
+              console.log("[AI Stream] Parsed Data:", data);
               
               if (data.type === "thinking") {
                 thinkingWrapper.classList.remove("d-none");
@@ -249,19 +258,23 @@
                 thinkingContent.innerText = fullThinking;
                 thinkingScroll.scrollTop = thinkingScroll.scrollHeight;
               } else if (data.type === "text") {
-                // Switching from loading/thinking to result
-                if (resultContainer.classList.contains("d-none")) {
-                   loadingContainer.classList.add("d-none");
-                   resultContainer.classList.remove("d-none");
-                }
+                // Sembunyikan loading, munculkan result
+                loadingContainer.classList.add("d-none");
+                resultContainer.classList.remove("d-none");
+                
                 fullResult += data.content;
                 resultText.innerText = fullResult;
               }
             } catch (e) {
-              console.warn("Partial JSON chunk or parse error:", e);
+              console.warn("[AI Stream] JSON Parse Error:", e, "on string:", jsonStr);
             }
           }
         }
+      }
+
+      function trimmed_line_preview(str) {
+        if (str.length > 100) return str.substring(0, 50) + "..." + str.substring(str.length - 20);
+        return str;
       }
     } catch (error) {
       console.error("Streaming error:", error);
