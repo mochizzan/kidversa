@@ -122,42 +122,52 @@ class PenilaianController < AdminController
 
               begin
                 data = JSON.parse(clean_json, symbolize_names: true)
-                puts "AI PROCESSING: #{data[:type]}" # Log singkat di terminal
 
-                content_raw = data.dig(:outputs, 0, :content) || data[:content] || data
-                content_list = content_raw.is_a?(Array) ? content_raw : [ content_raw ]
+                is_thinking_chunk = false
+                text_to_send = ""
 
-                content_list.each do |item|
-                  if item.is_a?(Hash)
-                    type = item[:type] || item[:object]
+                # Deteksi otomatis apakah blok ini mengandung proses thinking
+                raw_str = data.to_s
+                if raw_str.include?(":thinking") && !raw_str.include?(":thinking=>[]") && !raw_str.include?(":thinking=>\"\"")
+                  is_thinking_chunk = true
+                end
 
-                    if type == "thinking"
-                      thinking_val = item[:thinking] || item[:content]
-                      text = thinking_val.is_a?(Array) ? thinking_val.map { |t| t[:text] }.join : thinking_val
-                      sse.write({ type: "thinking", content: text }) if text.present?
-                    elsif [ "text", "answer", "message", "message.output.delta" ].include?(type) || item[:content].present?
-                      # Check nested content if present
-                      nested_content = item[:content]
-                      if nested_content.is_a?(Hash) && nested_content[:type] == "thinking"
-                        thinking_val = nested_content[:thinking]
-                        text = thinking_val.is_a?(Array) ? thinking_val.map { |t| (t.is_a?(Hash) ? t[:text] : t) }.join : thinking_val
-                        sse.write({ type: "thinking", content: text }) if text.present?
-                      else
-                        text = item[:text] || (nested_content.is_a?(String) ? nested_content : nil) || nested_content&.dig(:text)
-                        if text.present?
-                          full_message += text
-                          sse.write({ type: "text", content: text })
-                        end
-                      end
-                    end
-                  elsif item.is_a?(String)
-                    # Direct string content
-                    full_message += item
-                    sse.write({ type: "text", content: item })
+                # Coba cari JSON Text output dengan cara paling brutal & aman
+                payload = data[:choices]&.first&.dig(:delta) || data[:delta] || data[:message] || data[:content] || data
+
+                if payload.is_a?(Hash)
+                  if is_thinking_chunk && payload[:thinking].present?
+                    val = payload[:thinking]
+                    text_to_send = val.is_a?(Array) ? val.map { |v| v.is_a?(Hash) ? v[:text] : v.to_s }.join : val.to_s
+                  elsif payload[:text].present?
+                    text_to_send = payload[:text]
+                  elsif payload[:content].present?
+                    val = payload[:content]
+                    text_to_send = val.is_a?(Array) ? val.map { |v| v.is_a?(Hash) ? (v[:text]||v[:content]) : v.to_s }.join : val.to_s
+                  elsif data[:outputs].is_a?(Array)
+                    # Support Coze array formats
+                    text_to_send = data[:outputs].map { |o| o[:text] || o[:content] }.compact.join
+                  end
+                elsif payload.is_a?(String)
+                  text_to_send = payload
+                elsif payload.is_a?(Array)
+                  text_to_send = payload.map { |v| v.is_a?(Hash) ? (v[:text]||v[:content]) : v.to_s }.join
+                end
+
+                # Log ini akan membuktikan bahwa Backend BISA mengekstrak kata-katanya!
+                puts "[RUBY CHUNK] Thinking: #{is_thinking_chunk ? 'YES' : 'NO'} | Txt: #{text_to_send.inspect}"
+                STDOUT.flush
+
+                if text_to_send.present?
+                  if is_thinking_chunk
+                     sse.write({ type: "thinking", content: text_to_send })
+                  else
+                     full_message += text_to_send
+                     sse.write({ type: "text", content: text_to_send })
                   end
                 end
-              rescue JSON::ParserError => e
-                puts "Partial or invalid JSON skipped in chunk: #{e.message}"
+              rescue StandardError => e
+                puts "[RUBY PARSE ERR] #{e.message} on #{clean_json[0..100]}..."
               end
             end # end if data:
           end # end while
