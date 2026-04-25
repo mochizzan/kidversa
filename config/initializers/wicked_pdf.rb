@@ -14,8 +14,14 @@ WickedPdf.configure do |config|
   if Gem.win_platform?
     config.exe_path = "C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe"
   else
-    # Mencari otomatis path wkhtmltopdf di sistem linux (Ubuntu)
-    config.exe_path = `which wkhtmltopdf`.strip
+    # Prioritaskan path sistem Ubuntu untuk menghindari shim rbenv yang error
+    if File.exist?("/usr/local/bin/wkhtmltopdf")
+      config.exe_path = "/usr/local/bin/wkhtmltopdf"
+    elsif File.exist?("/usr/bin/wkhtmltopdf")
+      config.exe_path = "/usr/bin/wkhtmltopdf"
+    else
+      config.exe_path = `which wkhtmltopdf`.strip
+    end
   end
   #   or
   # config.exe_path = Gem.bin_path("wkhtmltopdf-binary", "wkhtmltopdf")
