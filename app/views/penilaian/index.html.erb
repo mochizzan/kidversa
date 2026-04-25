@@ -189,7 +189,7 @@
         if (current_catatan_blank) {
           if (!window.aiStreamingInitiated) {
             window.aiStreamingInitiated = true;
-            startAiStreaming();
+            document.getElementById('form-trigger').requestSubmit();
           }
         }
       }
@@ -202,95 +202,6 @@
           document.body.style.paddingRight = '';
       });
     });
-
-  async function startAiStreaming() {
-    const siswaId = new URLSearchParams(window.location.search).get("siswa_id");
-    if (!siswaId) return;
-
-    const thinkingWrapper = document.getElementById("ai-thinking-wrapper");
-    const thinkingContent = document.getElementById("ai-thinking-content");
-    const thinkingScroll = document.getElementById("ai-thinking-scroll");
-    const resultContainer = document.getElementById("ai-result-container");
-    const resultText = document.getElementById("ai-result-text");
-    const loadingContainer = document.getElementById("ai-loading-container");
-    const statusText = document.getElementById("ai-status-text");
-
-    try {
-      const response = await fetch(`/admin/penilaian/generate_catatan?siswa_id=${siswaId}&stream=true`, {
-        method: 'POST',
-        headers: {
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
-          'Accept': 'text/event-stream'
-        }
-      });
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullThinking = "";
-      let fullResult = "";
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const decoded = decoder.decode(value, { stream: true });
-        console.log("[AI Stream] Received chunk length:", value.length);
-        buffer += decoded;
-        
-        const lines = buffer.split(/\r?\n/);
-        buffer = lines.pop(); // Simpan bagian baris yang belum lengkap ke buffer
-
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (!trimmedLine) continue;
-          
-          console.log("[AI Stream] Debug Raw Line:", trimmed_line_preview(trimmedLine));
-
-          // Gunakan regex agar lebih fleksibel terhadap spasi (data: atau data: )
-          const match = trimmedLine.match(/^data:\s*(.*)$/);
-          if (match) {
-            const jsonStr = match[1];
-            try {
-              const data = JSON.parse(jsonStr);
-              console.log("[AI Stream] Parsed Data:", data);
-              
-              if (data.type === "thinking") {
-                thinkingWrapper.classList.remove("d-none");
-                fullThinking += data.content;
-                thinkingContent.innerText = fullThinking;
-                thinkingScroll.scrollTop = thinkingScroll.scrollHeight;
-              } else if (data.type === "text") {
-                // Sembunyikan thinking, tampilkan result container
-                loadingContainer.classList.add("d-none");
-                resultContainer.classList.remove("d-none");
-                
-                fullResult += data.content;
-                
-                // Tambahkan kursor blink text-primary agar terlihat masih proses stream
-                resultText.innerHTML = fullResult + '<span class="spinner-grow spinner-grow-sm text-primary ms-1" role="status" style="width: 0.8rem; height: 0.8rem;"></span>';
-              }
-            } catch (e) {
-              console.warn("[AI Stream] JSON Parse Error:", e, "on string:", jsonStr);
-            }
-          }
-        }
-      }
-
-      // Hapus spinner dan bersihkan teks saat stream selesai
-      if (resultText && fullResult.length > 0) {
-         resultText.innerText = fullResult;
-      }
-
-      function trimmed_line_preview(str) {
-        if (str.length > 100) return str.substring(0, 50) + "..." + str.substring(str.length - 20);
-        return str;
-      }
-    } catch (error) {
-      console.error("Streaming error:", error);
-      statusText.innerText = "Terjadi kesalahan saat memproses data.";
-    }
-  }
 
 
 
