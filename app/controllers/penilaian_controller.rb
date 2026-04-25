@@ -95,54 +95,13 @@ class PenilaianController < AdminController
     siswa_id = params[:siswa_id]
     current_catatan = Siswa.where(siswa_id: siswa_id).pick(:catatan)
 
-    if params[:stream] == "true" && current_catatan.blank?
-      response.headers["Content-Type"] = "text/event-stream"
-      response.headers["Last-Modified"] = Time.now.httpdate
-      response.headers["X-Accel-Buffering"] = "no"
-      response.headers["Cache-Control"] = "no-cache"
-      response.headers["Content-Encoding"] = "identity"
-
-      # Setup SSE
-      sse = SSE.new(response.stream, event: "message")
-
-      full_message = ""
-      full_thinking_message = ""
-      buffer = ""
-
-      begin
-        AiController.index(siswa_id) do |chunk_data|
-          # chunk_data dari mistral gem sudah berupa hash terurai: { type: "text" | "thinking", content: "..." }
-          next unless chunk_data.is_a?(Hash) && chunk_data[:content].present?
-
-          text_chunk = chunk_data[:content]
-          
-          if chunk_data[:type] == "thinking"
-            full_thinking_message += text_chunk
-            sse.write({ type: "thinking", content: text_chunk })
-          else
-            full_message += text_chunk
-            sse.write({ type: "text", content: text_chunk })
-          end
-
-          # Gunakan \n\n sebagai keep-alive sederhana
-          response.stream.write("\n\n")
-        end
-
-        # Save the final result
-        final_save_text = full_message.present? ? full_message : full_thinking_message
-        Siswa.find_by(siswa_id: siswa_id)&.update(catatan: final_save_text) if final_save_text.present?
-      ensure
-        sse.close
-      end
+    if current_catatan.blank? || params[:retry] == 'true'
+      @ai_message = AiController.index(siswa_id)
+      Siswa.find_by(siswa_id: siswa_id).update(catatan: @ai_message)
     else
-      if current_catatan.blank?
-        @ai_message = AiController.index(siswa_id)
-        Siswa.find_by(siswa_id: siswa_id).update(catatan: @ai_message)
-      else
-        @ai_message = current_catatan
-      end
-
-      render turbo_stream: turbo_stream.update("modal-body-ai", @ai_message)
+      @ai_message = current_catatan
     end
+
+    render turbo_stream: turbo_stream.update("modal-body-ai", @ai_message)
   end
 end
