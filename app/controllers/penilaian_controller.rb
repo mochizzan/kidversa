@@ -101,8 +101,18 @@ class PenilaianController < AdminController
       response.headers["X-Accel-Buffering"] = "no"
       response.headers["Cache-Control"] = "no-cache"
       response.headers["Content-Encoding"] = "identity"
-      # Trik Proxy: Kirim 10KB data kosong agar Nginx/Cloudflare langsung mem-bypass buffer mereka
-      response.stream.write ":" + (" " * 10240) + "\n"
+      # Helper untuk mengirim paket data + ekstra 4KB spasi kosong!
+      # Ini menjamin Nginx/Cloudflare selalu memuntahkan (flush) datanya secara instan setiap detiknya
+      write_stream = ->(type, content) do
+        if content.present?
+          json_str = { type: type, content: content }.to_json
+          # Kita kemas dalam format SSE yang benar + menambahkan comment padding
+          response.stream.write("data: #{json_str}\n\n:#{' ' * 4096}\n\n")
+        end
+      end
+
+      # Trik Proxy: Jebol buffer pertama dengan 10KB
+      response.stream.write ":" + (" " * 10240) + "\n\n"
 
       full_message = ""
       buffer = ""
@@ -137,30 +147,26 @@ class PenilaianController < AdminController
                     if type == "thinking"
                       thinking_val = item[:thinking] || item[:content]
                       text = thinking_val.is_a?(Array) ? thinking_val.map { |t| t[:text] }.join : thinking_val
-                      if text.present?
-                        response.stream.write "data: " + { type: "thinking", content: text }.to_json + "\n\n"
-                      end
+                      write_stream.call("thinking", text)
                     elsif [ "text", "answer", "message", "message.output.delta" ].include?(type) || item[:content].present?
                       # Check nested content if present
                       nested_content = item[:content]
                       if nested_content.is_a?(Hash) && nested_content[:type] == "thinking"
                         thinking_val = nested_content[:thinking]
                         text = thinking_val.is_a?(Array) ? thinking_val.map { |t| (t.is_a?(Hash) ? t[:text] : t) }.join : thinking_val
-                        if text.present?
-                          response.stream.write "data: " + { type: "thinking", content: text }.to_json + "\n\n"
-                        end
+                        write_stream.call("thinking", text)
                       else
                         text = item[:text] || (nested_content.is_a?(String) ? nested_content : nil) || nested_content&.dig(:text)
                         if text.present?
                           full_message += text
-                          response.stream.write "data: " + { type: "text", content: text }.to_json + "\n\n"
+                          write_stream.call("text", text)
                         end
                       end
                     end
                   elsif item.is_a?(String)
                     # Direct string content
                     full_message += item
-                    response.stream.write "data: " + { type: "text", content: item }.to_json + "\n\n"
+                    write_stream.call("text", item)
                   end
                 end
               rescue JSON::ParserError => e
